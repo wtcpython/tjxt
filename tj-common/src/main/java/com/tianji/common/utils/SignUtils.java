@@ -1,15 +1,9 @@
 package com.tianji.common.utils;
 
-/**
- * @ClassName SignUtils
- * @author wusongsong
- * @since 2022/7/3 11:25
- * @version 1.0.0
- **/
-
-import cn.hutool.core.util.HexUtil;
 import com.tianji.common.exceptions.CommonException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.util.UriUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -17,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +31,6 @@ public class SignUtils {
      * 生成token，用于调用支付系统的模块或外部系统调用
      * 签名（Signature）加密前格式：|v1-{AK}-{ExpireTime}|{SK}|{UrlPath}|{Method}|{QueryParam}|{body}|
      * 加密后token格式 ： v1-{AK}-{ExpireTime}-{Signature}
-     *
      * @param urlPath    访问uri
      * @param method     访问方法
      * @param queryParam 链接请求参数
@@ -47,8 +41,9 @@ public class SignUtils {
      * @return 访问token
      */
     public static String generateToken(String urlPath, String method, String queryParam,
-                                       Object body, long expireTime, String accessKey, String secretKey) {
-        log.debug("generateToken: urlPath={}, method={}, queryParam={}, body={}, expireTime={}", urlPath, method, queryParam, body, expireTime);
+            Object body, long expireTime, String accessKey, String secretKey) {
+        log.debug("generateToken: urlPath={}, method={}, queryParam={}, body={}, expireTime={}", urlPath, method,
+                queryParam, body, expireTime);
         if (StringUtils.isEmpty(accessKey) || StringUtils.isEmpty(secretKey)) {
             log.error("invalid AK or SK");
             throw new CommonException("Invalid AK or SK");
@@ -95,9 +90,9 @@ public class SignUtils {
             md5.reset();
             md5.update(sbSign.toString().getBytes("UTF-8"));
 
-            //  v2-{AK}-{ExpireTime}-{Signature}
+            // v2-{AK}-{ExpireTime}-{Signature}
             token = String.format("%s-%s-%s-%s", TOKEN_VERSION, accessKey, expireTime,
-                    new String(HexUtil.encodeHex(md5.digest())));
+                    HexFormat.of().formatHex(md5.digest()));
             log.info("token contents is : {}", token);
         } catch (UnsupportedEncodingException e) {
             log.error("failed to decode url or query path");
@@ -111,7 +106,6 @@ public class SignUtils {
 
     /**
      * 校验token
-     *
      * @param token      来自请求方法的token
      * @param uri        请求uri
      * @param method     请求方法
@@ -122,8 +116,9 @@ public class SignUtils {
      * @return 校验结果
      */
     public static boolean verifyToken(String token, String uri, String method,
-                                      String queryParam, Object body, String accessKey, String secretKey) {
-        log.debug("verifyToken: token={},urlPath={},method={},queryParam={},body={}", token, uri, method, queryParam, body);
+            String queryParam, Object body, String accessKey, String secretKey) {
+        log.debug("verifyToken: token={},urlPath={},method={},queryParam={},body={}", token, uri, method, queryParam,
+                body);
 
         if (StringUtils.isEmpty(token)) {
             log.warn("null token");
@@ -160,7 +155,6 @@ public class SignUtils {
         return false;
     }
 
-
     public static void main(String[] args) {
         String accessKey = "123";
         String secreatKey = "456";
@@ -168,8 +162,8 @@ public class SignUtils {
         String method = "GET";
         String params = "";
         Map<String, Object> body = new HashMap<>();
-//        body.put("keyword", "123");
-        String token = generateToken(urlPath, method, params, body, System.currentTimeMillis()  + 360000,
+        // body.put("keyword", "123");
+        String token = generateToken(urlPath, method, params, body, System.currentTimeMillis() + 360000,
                 accessKey, secreatKey);
         log.info("token : {}", token);
 

@@ -5,7 +5,6 @@ import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.utils.AssertUtils;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.pay.sdk.client.PayClient;
 import com.tianji.pay.sdk.constants.PayType;
 import com.tianji.pay.sdk.dto.PayApplyDTO;
@@ -29,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,7 +51,7 @@ public class PayServiceImpl implements IPayService {
     public List<PayChannelVO> queryPayChannels() {
         List<PayChannelDTO> list = payClient.listAllPayChannels();
         if (list == null) {
-            return CollUtils.emptyList();
+            return Collections.emptyList();
         }
         return list.stream()
                 .filter(p -> p.getStatus() == 1)
@@ -120,9 +120,9 @@ public class PayServiceImpl implements IPayService {
         // 3.查询支付状态
         PayResultDTO payResult = payClient.queryPayResult(orderId);
         int status = payResult.getStatus();
-        if(PayResultDTO.SUCCESS != status){
+        if (PayResultDTO.SUCCESS != status) {
             // 3.1.支付中或支付失败，需要重试查询
-            if(message.getDelayMillis().size() == 0){
+            if (message.getDelayMillis().size() == 0) {
                 // 重试次数用尽，如果依然未支付，则取消订单
                 orderService.cancelOrder(orderId, OrderCancelReason.TIME_OUT);
                 return;

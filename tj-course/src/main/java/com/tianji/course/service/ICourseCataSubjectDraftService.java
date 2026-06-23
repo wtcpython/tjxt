@@ -7,7 +7,6 @@ import com.tianji.course.domain.po.CourseCataSubjectDraft;
  * <p>
  * 课程-题目关系表草稿 服务类
  * </p>
- *
  * @author wusongsong
  * @since 2022-09-21
  */

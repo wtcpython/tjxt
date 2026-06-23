@@ -1,7 +1,7 @@
 package com.tianji.pay.sdk.constants;
 
-import com.tianji.common.utils.StringUtils;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 @Getter
 public enum RefundChannelEnum {
@@ -22,14 +22,15 @@ public enum RefundChannelEnum {
     OTHER_BALANCE("其他余额账户"),
     OTHER_BANKCARD("其他银行卡"),
     ;
+
     private final String desc;
 
     RefundChannelEnum(String desc) {
         this.desc = desc;
     }
 
-    public static String desc(String value){
-        if(StringUtils.isBlank(value)){
+    public static String desc(String value) {
+        if (StringUtils.isBlank(value)) {
             return "";
         }
         return RefundChannelEnum.valueOf(value).getDesc();

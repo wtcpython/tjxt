@@ -1,6 +1,5 @@
 package com.tianji.learning.handler;
 
-import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.DateUtils;
 import com.tianji.learning.constants.RedisConstants;
 import com.tianji.learning.domain.po.PointsBoard;
@@ -10,6 +9,7 @@ import com.tianji.learning.utils.TableInfoContext;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +29,7 @@ public class PointsBoardPersistentHandler {
     private final StringRedisTemplate redisTemplate;
 
     @XxlJob("createTableJob")
-    public void createPointsBoardTableOfLastSeason(){
+    public void createPointsBoardTableOfLastSeason() {
         // 1.获取上月时间
         LocalDateTime time = LocalDateTime.now().minusMonths(1);
         // 2.查询赛季id
@@ -43,7 +43,7 @@ public class PointsBoardPersistentHandler {
     }
 
     @XxlJob("savePointsBoard2DB")
-    public void savePointsBoard2DB(){
+    public void savePointsBoard2DB() {
         // 1.获取上月时间
         LocalDateTime time = LocalDateTime.now().minusMonths(1);
 
@@ -63,7 +63,7 @@ public class PointsBoardPersistentHandler {
         int pageSize = 10;
         while (true) {
             List<PointsBoard> boardList = pointsBoardService.queryCurrentBoardList(key, pageNo, pageSize);
-            if (CollUtils.isEmpty(boardList)) {
+            if (CollectionUtils.isEmpty(boardList)) {
                 break;
             }
             // 4.持久化到数据库
@@ -75,14 +75,14 @@ public class PointsBoardPersistentHandler {
             // 4.2.持久化
             pointsBoardService.saveBatch(boardList);
             // 5.翻页
-            pageNo+=total;
+            pageNo += total;
         }
 
         TableInfoContext.remove();
     }
 
     @XxlJob("clearPointsBoardFromRedis")
-    public void clearPointsBoardFromRedis(){
+    public void clearPointsBoardFromRedis() {
         // 1.获取上月时间
         LocalDateTime time = LocalDateTime.now().minusMonths(1);
         // 2.计算key

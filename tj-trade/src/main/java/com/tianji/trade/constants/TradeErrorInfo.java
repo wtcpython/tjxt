@@ -2,7 +2,7 @@ package com.tianji.trade.constants;
 
 public interface TradeErrorInfo {
 
-    String CARTS_FULL = "用户购物车课程不能超过{}";
+    String CARTS_FULL = "用户购物车课程不能超过%s";
     String COURSE_NOT_EXISTS = "课程不存在";
     String COURSE_EXPIRED = "课程已过期";
     String COURSE_NOT_FOR_SALE = "课程无法购买";

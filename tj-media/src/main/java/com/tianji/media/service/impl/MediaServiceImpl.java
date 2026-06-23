@@ -25,6 +25,9 @@ import com.tianji.media.mapper.MediaMapper;
 import com.tianji.media.service.IMediaService;
 import com.tianji.media.storage.IMediaStorage;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +40,6 @@ import static com.tianji.media.constants.FileErrorInfo.MEDIA_NOT_EXISTS;
  * <p>
  * 媒资表，主要是视频文件 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-06-30
  */
@@ -66,12 +68,12 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         // 2.查询用户课程表，是否是购买过的课程
         Long lessonId = learningClient.isLessonValid(courseId);
 
-        if(lessonId != null){
+        if (lessonId != null) {
             // 2.1.是，查询媒资信息，直接获取签名
             Media media = getById(sectionInfo.getMediaId());
             AssertUtils.isNotNull(media, MEDIA_NOT_EXISTS);
             // 1）获取签名
-            String signature =  mediaStorage.getPlaySignature(media.getFileId(), UserContext.getUser(), null);
+            String signature = mediaStorage.getPlaySignature(media.getFileId(), UserContext.getUser(), null);
             // 2）返回
             VideoPlayVO vo = new VideoPlayVO();
             vo.setSignature(signature);
@@ -80,7 +82,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         }
         // 2.2.否，判断课程章节是否免费
         Boolean trailer = sectionInfo.getTrailer();
-        if(BooleanUtils.isFalse(trailer)) {
+        if (BooleanUtils.isFalse(trailer)) {
             // 2.3.不免费，抛出异常
             throw new ForbiddenException(FileErrorInfo.MEDIA_NOT_FREE);
         }
@@ -89,7 +91,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         Media media = getById(sectionInfo.getMediaId());
         AssertUtils.isNotNull(media, MEDIA_NOT_EXISTS);
         // 4.获取签名
-        String signature =  mediaStorage.getPlaySignature(
+        String signature = mediaStorage.getPlaySignature(
                 media.getFileId(), UserContext.getUser(), sectionInfo.getFreeDuration());
         // 5.返回
         VideoPlayVO vo = new VideoPlayVO();
@@ -98,13 +100,12 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         return vo;
     }
 
-
     @Override
     public VideoPlayVO getPlaySignatureByMediaId(Long mediaId) {
         // 1.根据id查询媒资信息
         Media media = getById(mediaId);
         // 2.获取签名
-        String signature =  mediaStorage.getPlaySignature(media.getFileId(), UserContext.getUser(), null);
+        String signature = mediaStorage.getPlaySignature(media.getFileId(), UserContext.getUser(), null);
         // 3.返回
         VideoPlayVO vo = new VideoPlayVO();
         vo.setSignature(signature);
@@ -116,7 +117,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
     public PageDTO<MediaVO> queryMediaPage(MediaQuery query) {
         // 1.分页条件
         Page<Media> mediaPage = new Page<>(query.getPageNo(), query.getPageSize());
-        if(StringUtils.isNotBlank(query.getSortBy())){
+        if (StringUtils.isNotBlank(query.getSortBy())) {
             mediaPage.addOrder(new OrderItem().setColumn(query.getSortBy()).setAsc(query.getIsAsc()));
         }
         // 2.分页搜索
@@ -125,7 +126,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
                 .page(mediaPage);
         // 3.解析数据
         List<Media> records = mediaPage.getRecords();
-        if (CollUtils.isEmpty(records)) {
+        if (CollectionUtils.isEmpty(records)) {
             return PageDTO.empty(mediaPage);
         }
         List<Long> ids = new ArrayList<>(records.size());
@@ -144,7 +145,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
 
         // 5.查询创建者信息
         Map<Long, String> userMap = null;
-        if(CollUtils.isNotEmpty(createIds)) {
+        if (CollectionUtils.isNotEmpty(createIds)) {
             List<UserDTO> users = userClient.queryUserByIds(createIds);
             AssertUtils.isNotEmpty(users, FileErrorInfo.USER_NOT_EXISTS);
             userMap = users.stream().collect(Collectors.toMap(UserDTO::getId, UserDTO::getName));
@@ -154,7 +155,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         for (Media m : records) {
             MediaVO v = BeanUtils.toBean(m, MediaVO.class);
             v.setUseTimes(quoteMap.get(m.getId()));
-            if(userMap != null) {
+            if (userMap != null) {
                 v.setCreater(userMap.get(m.getCreater()));
             }
             list.add(v);
@@ -187,7 +188,7 @@ public class MediaServiceImpl extends ServiceImpl<MediaMapper, Media> implements
         if (old == null) {
             // 2.如果不存在，新增
             save(media);
-        }else {
+        } else {
             // 3.存在，则更新
             lambdaUpdate()
                     .set(Media::getStatus, FileStatus.PROCESSED.getValue())

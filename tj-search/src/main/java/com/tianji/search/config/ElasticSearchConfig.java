@@ -1,7 +1,7 @@
 package com.tianji.search.config;
 
-import cn.hutool.core.collection.CollUtil;
 import jakarta.annotation.Resource;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -17,7 +17,7 @@ public class ElasticSearchConfig {
 
     @Bean
     public RestHighLevelClient restClient() {
-        String uri = CollUtil.getFirst(this.elasticsearchProperties.getUris());
+        String uri = CollectionUtils.get(this.elasticsearchProperties.getUris(), 0);
         return new RestHighLevelClient(RestClient.builder(HttpHost.create(uri)));
     }
 }

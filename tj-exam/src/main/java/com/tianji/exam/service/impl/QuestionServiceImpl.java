@@ -11,8 +11,6 @@ import com.tianji.common.constants.Constant;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.CollUtils;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.exam.domain.dto.QuestionFormDTO;
 import com.tianji.exam.domain.po.Question;
 import com.tianji.exam.domain.po.QuestionBiz;
@@ -25,6 +23,8 @@ import com.tianji.exam.service.IQuestionBizService;
 import com.tianji.exam.service.IQuestionDetailService;
 import com.tianji.exam.service.IQuestionService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +37,6 @@ import static com.tianji.exam.constants.ExamErrorInfo.QUESTION_NOT_EXISTS;
  * <p>
  * 题目 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-09-02
  */
@@ -78,7 +77,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         // 1.保存题目信息
         Question question = BeanUtils.copyBean(questionDTO, Question.class);
         List<Long> cateIds = questionDTO.getCateIds();
-        if (CollUtils.isNotEmpty(cateIds) && cateIds.size() == 3) {
+        if (CollectionUtils.isNotEmpty(cateIds) && cateIds.size() == 3) {
             question.setCateId1(cateIds.get(0));
             question.setCateId2(cateIds.get(1));
             question.setCateId3(cateIds.get(2));
@@ -113,13 +112,13 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         Page<Question> page = lambdaQuery()
                 .eq(query.getDifficulty() != null, Question::getDifficulty, query.getDifficulty())
                 .eq(query.getCreater() != null, Question::getCreater, query.getCreater())
-                .in(CollUtils.isNotEmpty(query.getTypes()), Question::getType, query.getTypes())
-                .in(CollUtils.isNotEmpty(query.getCateIds()), Question::getCateId3, query.getCateIds())
+                .in(CollectionUtils.isNotEmpty(query.getTypes()), Question::getType, query.getTypes())
+                .in(CollectionUtils.isNotEmpty(query.getCateIds()), Question::getCateId3, query.getCateIds())
                 .like(StringUtils.isNotBlank(query.getKeyword()), Question::getName, query.getKeyword())
                 .page(query.toMpPage(Constant.DATA_FIELD_NAME_UPDATE_TIME, false));
         // 2.判空
         List<Question> records = page.getRecords();
-        if (CollUtils.isEmpty(records)) {
+        if (CollectionUtils.isEmpty(records)) {
             return PageDTO.empty(page);
         }
         // 3.查询VO信息，包含：引用次数、提问者信息
@@ -133,7 +132,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         Map<Long, Integer> countMap = bizService.countUsedTimes(qIds);
         // 3.2.查询用户
         Map<Long, UserDTO> userMap = new HashMap<>(uIds.size());
-        if (CollUtils.isNotEmpty(uIds)) {
+        if (CollectionUtils.isNotEmpty(uIds)) {
             List<UserDTO> users = userClient.queryUserByIds(uIds);
             userMap = users.stream().collect(Collectors.toMap(UserDTO::getId, u -> u));
         }
@@ -187,8 +186,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     public List<QuestionDTO> queryQuestionByIds(List<Long> ids) {
         // 1.查询题目集合
         List<Question> questions = listByIds(ids);
-        if (CollUtils.isEmpty(questions)) {
-            return CollUtils.emptyList();
+        if (CollectionUtils.isEmpty(questions)) {
+            return Collections.emptyList();
         }
 
         // 2.查询详情
@@ -227,8 +226,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         List<QuestionBiz> list = bizService.lambdaQuery()
                 .eq(QuestionBiz::getBizId, bizId)
                 .list();
-        if (CollUtils.isEmpty(list)) {
-            return CollUtils.emptyList();
+        if (CollectionUtils.isEmpty(list)) {
+            return Collections.emptyList();
         }
         // 2.获取问题id
         List<Long> ids = list.stream().map(QuestionBiz::getQuestionId).collect(Collectors.toList());
@@ -240,7 +239,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     public Boolean checkNameValid(String name) {
         return lambdaQuery()
                 .eq(Question::getName, name)
-                .count()<=0;
+                .count() <= 0;
     }
 
     @Override
@@ -248,8 +247,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         // 1.根据id查询题目
         List<Question> questions = listByIds(ids);
         // 2.判空
-        if (CollUtils.isEmpty(questions)) {
-            return CollUtils.emptyMap();
+        if (CollectionUtils.isEmpty(questions)) {
+            return Collections.emptyMap();
         }
         return questions.stream().collect(Collectors.toMap(Question::getId, Question::getScore));
     }

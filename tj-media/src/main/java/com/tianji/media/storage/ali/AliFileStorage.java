@@ -6,9 +6,10 @@ import com.aliyun.oss.model.*;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.CommonException;
 import com.tianji.common.utils.AssertUtils;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.media.storage.IFileStorage;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.InputStream;
 import java.util.List;
@@ -83,11 +84,11 @@ public class AliFileStorage implements IFileStorage {
     @Override
     public void deleteFiles(List<String> keys) {
         // 1.数据校验
-        if(CollUtils.isEmpty(keys)){
+        if (CollectionUtils.isEmpty(keys)) {
             return;
         }
         AssertUtils.isNotBlank(bucketName, BUCKET_NAME_IS_NULL);
-        if(keys.size() > 1000){
+        if (keys.size() > 1000) {
             throw new BadRequestException(FILE_KEY_TOO_MANY);
         }
         // 2.准备request

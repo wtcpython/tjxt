@@ -1,15 +1,15 @@
 package com.tianji.promotion.utils;
 
-import cn.hutool.core.util.RandomUtil;
 import com.tianji.common.exceptions.CommonException;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.spec.IvParameterSpec;
+import com.tianji.common.utils.RandomUtils;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.IvParameterSpec;
 
 /**
  * Encryption and Decryption using AES 256 Algorithm
@@ -23,7 +23,7 @@ public class AESUtil {
     private final IvParameterSpec ivSpec;
 
     public AESUtil() {
-        this(RandomUtil.randomString(16), RandomUtil.randomString(16));
+        this(RandomUtils.randomString(16), RandomUtils.randomString(16));
     }
 
     public AESUtil(String key, String iv) {

@@ -3,8 +3,6 @@ package com.tianji.learning.service.impl;
 import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
 import com.tianji.common.constants.MqConstants;
 import com.tianji.common.exceptions.BizIllegalException;
-import com.tianji.common.utils.BooleanUtils;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.DateUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.learning.constants.RedisConstants;
@@ -12,6 +10,8 @@ import com.tianji.learning.domain.vo.SignResultVO;
 import com.tianji.learning.mq.message.SignInMessage;
 import com.tianji.learning.service.ISignRecordService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.data.redis.connection.BitFieldSubCommands;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -87,15 +87,15 @@ public class SignRecordServiceImpl implements ISignRecordService {
         List<Long> result = redisTemplate.opsForValue()
                 .bitField(key, BitFieldSubCommands.create().get(
                         BitFieldSubCommands.BitFieldType.unsigned(dayOfMonth)).valueAt(0));
-        if (CollUtils.isEmpty(result)) {
+        if (CollectionUtils.isEmpty(result)) {
             return new Byte[0];
         }
         int num = result.get(0).intValue();
 
         Byte[] arr = new Byte[dayOfMonth];
         int pos = dayOfMonth - 1;
-        while (pos >= 0){
-            arr[pos--] = (byte)(num & 1);
+        while (pos >= 0) {
+            arr[pos--] = (byte) (num & 1);
             // 把数字右移一位，抛弃最后一个bit位，继续下一个bit位
             num >>>= 1;
         }
@@ -107,7 +107,7 @@ public class SignRecordServiceImpl implements ISignRecordService {
         List<Long> result = redisTemplate.opsForValue()
                 .bitField(key, BitFieldSubCommands.create().get(
                         BitFieldSubCommands.BitFieldType.unsigned(len)).valueAt(0));
-        if (CollUtils.isEmpty(result)) {
+        if (CollectionUtils.isEmpty(result)) {
             return 0;
         }
         int num = result.get(0).intValue();

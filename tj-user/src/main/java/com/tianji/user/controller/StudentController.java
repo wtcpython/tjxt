@@ -7,7 +7,7 @@ import com.tianji.user.domain.vo.StudentPageVo;
 import com.tianji.user.service.IStudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/students")
 @Tag(name = "用户管理接口")
+@RequiredArgsConstructor
 public class StudentController {
 
-    @Autowired
-    private IStudentService studentService;
+    private final IStudentService studentService;
 
     @Operation(summary = "分页查询学生信息")
     @GetMapping("/page")
-    public PageDTO<StudentPageVo> queryStudentPage(UserPageQuery pageQuery){
+    public PageDTO<StudentPageVo> queryStudentPage(UserPageQuery pageQuery) {
         return studentService.queryStudentPage(pageQuery);
     }
 

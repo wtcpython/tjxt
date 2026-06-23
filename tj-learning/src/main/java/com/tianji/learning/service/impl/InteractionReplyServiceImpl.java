@@ -11,7 +11,6 @@ import com.tianji.common.constants.MqConstants;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.learning.domain.dto.ReplyDTO;
 import com.tianji.learning.domain.po.InteractionQuestion;
@@ -23,6 +22,7 @@ import com.tianji.learning.mapper.InteractionReplyMapper;
 import com.tianji.learning.service.IInteractionQuestionService;
 import com.tianji.learning.service.IInteractionReplyService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,12 +37,12 @@ import static com.tianji.common.constants.Constant.DATA_FIELD_NAME_LIKED_TIME;
  * <p>
  * 互动问题的回答或评论 服务实现类
  * </p>
- *
  * @author 虎哥
  */
 @Service
 @RequiredArgsConstructor
-public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMapper, InteractionReply> implements IInteractionReplyService {
+public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMapper, InteractionReply>
+        implements IInteractionReplyService {
 
     private final IInteractionQuestionService questionService;
     private final UserClient userClient;
@@ -103,10 +103,9 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
                 .eq(!forAdmin, InteractionReply::getHidden, false)
                 .page(query.toMpPage( // 先根据点赞数排序，点赞数相同，再按照创建时间排序
                         OrderItem.desc(DATA_FIELD_NAME_LIKED_TIME),
-                        OrderItem.asc(DATA_FIELD_NAME_CREATE_TIME))
-                );
+                        OrderItem.asc(DATA_FIELD_NAME_CREATE_TIME)));
         List<InteractionReply> records = page.getRecords();
-        if (CollUtils.isEmpty(records)) {
+        if (CollectionUtils.isEmpty(records)) {
             return PageDTO.empty(page);
         }
         // 3.数据处理，需要查询：提问者信息、回复目标信息、当前用户是否点赞
@@ -218,7 +217,7 @@ public class InteractionReplyServiceImpl extends ServiceImpl<InteractionReplyMap
             userMap = users.stream().collect(Collectors.toMap(UserDTO::getId, u -> u));
         }
         // 2.4.查询用户点赞状态
-        Set<Long> bizLiked = remarkClient.isBizLiked(CollUtils.singletonList(id));
+        Set<Long> bizLiked = remarkClient.isBizLiked(Collections.singletonList(id));
         // 4.处理VO
         // 4.1.拷贝基础属性
         ReplyVO v = BeanUtils.toBean(r, ReplyVO.class);

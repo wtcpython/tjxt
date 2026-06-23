@@ -3,8 +3,6 @@ package com.tianji.remark.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.api.dto.remark.LikedTimesDTO;
 import com.tianji.common.autoconfigure.mq.RabbitMqHelper;
-import com.tianji.common.utils.CollUtils;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.remark.constants.RedisConstants;
 import com.tianji.remark.domain.dto.LikeRecordFormDTO;
@@ -12,6 +10,8 @@ import com.tianji.remark.domain.po.LikedRecord;
 import com.tianji.remark.mapper.LikedRecordMapper;
 import com.tianji.remark.service.ILikedRecordService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -31,12 +31,12 @@ import static com.tianji.common.constants.MqConstants.Key.LIKED_TIMES_KEY_TEMPLA
  * <p>
  * 点赞记录表 服务实现类
  * </p>
- *
  * @author 虎哥
  */
 @Service
 @RequiredArgsConstructor
-public class LikedRecordServiceRedisImpl extends ServiceImpl<LikedRecordMapper, LikedRecord> implements ILikedRecordService {
+public class LikedRecordServiceRedisImpl extends ServiceImpl<LikedRecordMapper, LikedRecord>
+        implements ILikedRecordService {
 
     private final RabbitMqHelper mqHelper;
     private final StringRedisTemplate redisTemplate;
@@ -59,8 +59,7 @@ public class LikedRecordServiceRedisImpl extends ServiceImpl<LikedRecordMapper, 
         redisTemplate.opsForZSet().add(
                 RedisConstants.LIKES_TIMES_KEY_PREFIX + recordDTO.getBizType(),
                 recordDTO.getBizId().toString(),
-                likedTimes
-        );
+                likedTimes);
     }
 
     @Override
@@ -88,7 +87,7 @@ public class LikedRecordServiceRedisImpl extends ServiceImpl<LikedRecordMapper, 
         // 1.读取并移除Redis中缓存的点赞总数
         String key = RedisConstants.LIKES_TIMES_KEY_PREFIX + bizType;
         Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet().popMin(key, maxBizSize);
-        if (CollUtils.isEmpty(tuples)) {
+        if (CollectionUtils.isEmpty(tuples)) {
             return;
         }
         // 2.数据转换
@@ -103,8 +102,7 @@ public class LikedRecordServiceRedisImpl extends ServiceImpl<LikedRecordMapper, 
         }
         // 3.发送MQ消息
         mqHelper.send(
-                LIKE_RECORD_EXCHANGE,
-                StringUtils.format(LIKED_TIMES_KEY_TEMPLATE, bizType),
+                LIKE_RECORD_EXCHANGE, String.format(LIKED_TIMES_KEY_TEMPLATE, bizType),
                 list);
     }
 

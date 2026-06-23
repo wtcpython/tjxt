@@ -2,7 +2,7 @@ package com.tianji.common.autoconfigure.redisson.aspect;
 
 import com.tianji.common.autoconfigure.redisson.annotations.Lock;
 import com.tianji.common.exceptions.BizIllegalException;
-import com.tianji.common.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -32,7 +32,7 @@ public class LockAspect {
         this.redissonClient = redissonClient;
     }
 
-    //通过环绕加锁，方法执行前加锁，方法执行后根据注解使用解锁
+    // 通过环绕加锁，方法执行前加锁，方法执行后根据注解使用解锁
     @Around("@annotation(properties)")
     public Object handleLock(ProceedingJoinPoint pjp, Lock properties) throws Throwable {
         if (!properties.autoUnlock() && properties.leaseTime() <= 0) {
@@ -72,7 +72,7 @@ public class LockAspect {
     /**
      * 解析锁名称
      * @param name 原始锁名称
-     * @param pjp 切入点
+     * @param pjp  切入点
      * @return 解析后的锁名称
      */
     private String getLockName(String name, ProceedingJoinPoint pjp) {
@@ -102,7 +102,7 @@ public class LockAspect {
 
     private Method resolveMethod(ProceedingJoinPoint pjp) {
         // 1.获取方法签名
-        MethodSignature signature = (MethodSignature)pjp.getSignature();
+        MethodSignature signature = (MethodSignature) pjp.getSignature();
         // 2.获取字节码
         Class<?> clazz = pjp.getTarget().getClass();
         // 3.方法名称
@@ -112,7 +112,7 @@ public class LockAspect {
         return tryGetDeclaredMethod(clazz, name, parameterTypes);
     }
 
-    private Method tryGetDeclaredMethod(Class<?> clazz, String name, Class<?> ... parameterTypes){
+    private Method tryGetDeclaredMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
         try {
             // 5.反射获取方法
             return clazz.getDeclaredMethod(name, parameterTypes);

@@ -9,7 +9,7 @@ import com.tianji.data.model.vo.EchartsVO;
 import com.tianji.data.model.vo.SerierVO;
 import com.tianji.data.service.BoardService;
 import com.tianji.data.utils.DataUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -26,10 +26,10 @@ import static com.tianji.data.constants.RedisConstants.KEY_BOARD_DATA;
  * @Version
  **/
 @Service
+@RequiredArgsConstructor
 public class BoardServiceImpl implements BoardService {
 
-    @Autowired
-    private StringRedisTemplate redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     public EchartsVO boardData(List<Integer> types) {
@@ -58,13 +58,12 @@ public class BoardServiceImpl implements BoardService {
                     dataTypeEnum.getAxisType(),
                     data,
                     max + dataTypeEnum.getUnit(),
-                    min + dataTypeEnum.getUnit()
-                    ));
+                    min + dataTypeEnum.getUnit()));
             // 2.3.设置y轴数据
             yAxis.add(AxisVO.builder()
                     .max(max)
                     .min(NumberUtils.setScale(min * 0.9))
-                    .interval(((int)NumberUtils.div((max - min * 0.9), 10.0) + 1) * 1.0)
+                    .interval(((int) NumberUtils.div((max - min * 0.9), 10.0) + 1) * 1.0)
                     .average(
                             NumberUtils.setScale(NumberUtils.null2Zero(NumberUtils.average(data))))
                     .type(AxisVO.TYPE_VALUE)

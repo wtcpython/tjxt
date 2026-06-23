@@ -1,18 +1,19 @@
 package com.tianji.exam.service.impl;
 
-import cn.hutool.core.convert.Convert;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.api.dto.IdAndNumDTO;
 import com.tianji.api.dto.exam.QuestionBizDTO;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.exam.domain.po.QuestionBiz;
 import com.tianji.exam.mapper.QuestionBizMapper;
 import com.tianji.exam.service.IQuestionBizService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.IterableUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +23,6 @@ import java.util.stream.Collectors;
  * <p>
  * 问题和业务关联表，例如把小节id和问题id关联，一个小节下可以有多个问题 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-09-02
  */
@@ -34,7 +34,7 @@ public class QuestionBizServiceImpl extends ServiceImpl<QuestionBizMapper, Quest
         Long count = lambdaQuery()
                 .eq(QuestionBiz::getQuestionId, questionId)
                 .count();
-        return count == null ? 0 : Convert.toInt(count);
+        return count == null ? 0 : Math.toIntExact(count);
     }
 
     @Override
@@ -55,8 +55,8 @@ public class QuestionBizServiceImpl extends ServiceImpl<QuestionBizMapper, Quest
 
     @Override
     public List<QuestionBizDTO> queryQuestionIdsByBizIds(List<Long> bizIds) {
-        if (CollUtils.isEmpty(bizIds)) {
-            return CollUtils.emptyList();
+        if (CollectionUtils.isEmpty(bizIds)) {
+            return Collections.emptyList();
         }
         List<QuestionBiz> list = lambdaQuery()
                 .in(QuestionBiz::getBizId, bizIds)
@@ -67,7 +67,7 @@ public class QuestionBizServiceImpl extends ServiceImpl<QuestionBizMapper, Quest
     @Override
     @Transactional
     public void saveQuestionBizInfoBatch(List<QuestionBizDTO> qbs) {
-        if (CollUtils.isEmpty(qbs)) {
+        if (CollectionUtils.isEmpty(qbs)) {
             return;
         }
         // 1.获取业务id
@@ -83,8 +83,8 @@ public class QuestionBizServiceImpl extends ServiceImpl<QuestionBizMapper, Quest
 
     @Override
     public Map<Long, Integer> queryQuestionScoresByBizIds(Iterable<Long> bizIds) {
-        if (CollUtils.isEmpty(bizIds)) {
-            return CollUtils.emptyMap();
+        if (IterableUtils.isEmpty(bizIds)) {
+            return Collections.emptyMap();
         }
         // 1.统计biz及对应题目的分数和
         List<IdAndNumDTO> list = baseMapper.countQuestionScoresByBizIds(bizIds);

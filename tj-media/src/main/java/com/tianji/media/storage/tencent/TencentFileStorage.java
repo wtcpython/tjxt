@@ -1,18 +1,18 @@
 package com.tianji.media.storage.tencent;
 
-import cn.hutool.core.util.StrUtil;
-import com.tianji.common.exceptions.BadRequestException;
-import com.tianji.common.exceptions.CommonException;
-import com.tianji.common.utils.AssertUtils;
-import com.tianji.common.utils.CollUtils;
-import com.tianji.media.config.TencentProperties;
-import com.tianji.media.storage.IFileStorage;
 import com.qcloud.cos.COSClient;
 import com.qcloud.cos.model.*;
 import com.qcloud.cos.model.DeleteObjectsRequest.KeyVersion;
 import com.qcloud.cos.transfer.TransferManager;
 import com.qcloud.cos.transfer.Upload;
+import com.tianji.common.exceptions.BadRequestException;
+import com.tianji.common.exceptions.CommonException;
+import com.tianji.common.utils.AssertUtils;
+import com.tianji.media.config.TencentProperties;
+import com.tianji.media.storage.IFileStorage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.InputStream;
 import java.util.List;
@@ -28,7 +28,8 @@ public class TencentFileStorage implements IFileStorage {
     private final String bucketName;
     private final String region;
 
-    public TencentFileStorage(COSClient tencentCosClient, TransferManager transferManager, TencentProperties properties) {
+    public TencentFileStorage(COSClient tencentCosClient, TransferManager transferManager,
+            TencentProperties properties) {
         this.cosClient = tencentCosClient;
         this.transferManager = transferManager;
         this.bucketName = properties.getCos().getBucket() + "-" + properties.getAppId();
@@ -57,7 +58,7 @@ public class TencentFileStorage implements IFileStorage {
             // 6.返回信息 TODO 改变原有的返回值，返回文件访问路径，不再返回requestId
             // return result.getRequestId();
             // https://tianji-1259405500.cos.ap-nanjing.myqcloud.com/f00076a59de6410d8262ca48c1c64ec9.png
-            return StrUtil.format("https://{}.cos.{}.myqcloud.com/{}",
+            return String.format("https://%s.cos.%s.myqcloud.com/%s",
                     this.bucketName,
                     this.region,
                     key);
@@ -102,7 +103,7 @@ public class TencentFileStorage implements IFileStorage {
     @Override
     public void deleteFiles(List<String> keys) {
         // 1.数据校验
-        if (CollUtils.isEmpty(keys)) {
+        if (CollectionUtils.isEmpty(keys)) {
             return;
         }
         AssertUtils.isNotBlank(bucketName, BUCKET_NAME_IS_NULL);

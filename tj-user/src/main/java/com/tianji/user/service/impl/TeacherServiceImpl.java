@@ -11,7 +11,7 @@ import com.tianji.user.domain.vo.TeacherPageVO;
 import com.tianji.common.enums.UserType;
 import com.tianji.user.service.ITeacherService;
 import com.tianji.user.service.IUserDetailService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,16 +23,14 @@ import java.util.stream.Collectors;
  * <p>
  * 教师详情表 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-07-12
  */
 @Service
+@RequiredArgsConstructor
 public class TeacherServiceImpl implements ITeacherService {
-    @Autowired
-    private IUserDetailService detailService;
-    @Autowired
-    private CourseClient courseClient;
+    private final IUserDetailService detailService;
+    private final CourseClient courseClient;
 
     @Override
     public PageDTO<TeacherPageVO> queryTeacherPage(UserPageQuery pageQuery) {

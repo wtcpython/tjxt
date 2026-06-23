@@ -1,12 +1,12 @@
 package com.tianji.message.handler;
 
 import com.tianji.common.domain.dto.PageDTO;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.message.domain.po.NoticeTask;
 import com.tianji.message.service.INoticeTaskService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class NoticeJobHandler {
     private final INoticeTaskService taskService;
 
     @XxlJob("publishNoticeJob")
-    public void publishNotice(){
+    public void publishNotice() {
         // 1.获取分片参数，作为数据查询的分页参数，分片数+1作为页码，jobParam作为每页大小，默认size为10
         int index = XxlJobHelper.getShardIndex() + 1;
         String jobParam = XxlJobHelper.getJobParam();

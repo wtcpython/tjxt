@@ -1,10 +1,10 @@
 package com.tianji.common.validate;
 
-import com.tianji.common.utils.ArrayUtils;
 import com.tianji.common.validate.annotations.EnumValid;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * 枚举校验器校验逻辑
@@ -18,16 +18,16 @@ public class EnumValueValidator implements ConstraintValidator<EnumValid, Intege
     @Override
     public void initialize(EnumValid enumValid) {
         this.enums = enumValid.enumeration();
-        log.info("payload>>{}",ArrayUtils.toString(enumValid.payload()));
+        log.info("payload>>{}", ArrayUtils.toString(enumValid.payload()));
     }
 
     @Override
     public boolean isValid(Integer value, ConstraintValidatorContext context) {
         // 不做空校验
-        if(value == null){
+        if (value == null) {
             return true;
         }
-        //没有配置枚举值不校验
+        // 没有配置枚举值不校验
         if (ArrayUtils.isEmpty(enums)) {
             return true;
         }

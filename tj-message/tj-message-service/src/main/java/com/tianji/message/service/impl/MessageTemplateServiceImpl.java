@@ -2,15 +2,15 @@ package com.tianji.message.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.tianji.message.domain.dto.MessageTemplateDTO;
-import com.tianji.message.domain.dto.MessageTemplateFormDTO;
-import com.tianji.message.domain.query.MessageTemplatePageQuery;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.StringUtils;
+import com.tianji.message.domain.dto.MessageTemplateDTO;
+import com.tianji.message.domain.dto.MessageTemplateFormDTO;
 import com.tianji.message.domain.po.MessageTemplate;
+import com.tianji.message.domain.query.MessageTemplatePageQuery;
 import com.tianji.message.mapper.MessageTemplateMapper;
 import com.tianji.message.service.IMessageTemplateService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,12 +19,12 @@ import java.util.List;
  * <p>
  * 第三方短信平台签名和模板信息 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-08-19
  */
 @Service
-public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplate> implements IMessageTemplateService {
+public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMapper, MessageTemplate>
+        implements IMessageTemplateService {
 
     @Override
     public List<MessageTemplate> queryByNoticeTemplateId(Long templateId) {
@@ -66,6 +66,6 @@ public class MessageTemplateServiceImpl extends ServiceImpl<MessageTemplateMappe
 
     @Override
     public MessageTemplateDTO queryMessageTemplate(Long id) {
-        return BeanUtils.copyBean( getById(id), MessageTemplateDTO.class);
+        return BeanUtils.copyBean(getById(id), MessageTemplateDTO.class);
     }
 }

@@ -5,7 +5,6 @@ import com.tianji.api.client.trade.TradeClient;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.enums.UserType;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.RandomUtils;
 import com.tianji.user.constants.UserConstants;
 import com.tianji.user.domain.dto.StudentFormDTO;
@@ -17,6 +16,7 @@ import com.tianji.user.service.IStudentService;
 import com.tianji.user.service.IUserDetailService;
 import com.tianji.user.service.IUserService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
  * <p>
  * 学员详情表 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-07-12
  */
@@ -62,16 +61,15 @@ public class StudentServiceImpl implements IStudentService {
     @Override
     public void updateMyPassword(StudentFormDTO studentFormDTO) {
         userService.updatePasswordByPhone(
-                studentFormDTO.getCellPhone(), studentFormDTO.getCode(), studentFormDTO.getPassword()
-        );
+                studentFormDTO.getCellPhone(), studentFormDTO.getCode(), studentFormDTO.getPassword());
     }
 
     @Override
     public PageDTO<StudentPageVo> queryStudentPage(UserPageQuery query) {
         // 1.分页条件
-        Page<UserDetail> page  =  detailService.queryUserDetailByPage(query, UserType.STUDENT);
+        Page<UserDetail> page = detailService.queryUserDetailByPage(query, UserType.STUDENT);
         List<UserDetail> records = page.getRecords();
-        if (CollUtils.isEmpty(records)) {
+        if (CollectionUtils.isEmpty(records)) {
             return PageDTO.empty(page);
         }
 

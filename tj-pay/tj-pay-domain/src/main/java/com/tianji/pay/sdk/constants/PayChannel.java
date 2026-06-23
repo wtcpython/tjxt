@@ -1,7 +1,7 @@
 package com.tianji.pay.sdk.constants;
 
-import com.tianji.common.utils.StringUtils;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 
 @Getter
 public enum PayChannel {
@@ -15,7 +15,7 @@ public enum PayChannel {
         this.desc = desc;
     }
 
-    public static String desc(String value){
+    public static String desc(String value) {
         if (StringUtils.isBlank(value)) {
             return "";
         }

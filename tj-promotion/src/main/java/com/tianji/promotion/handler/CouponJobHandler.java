@@ -3,7 +3,6 @@ package com.tianji.promotion.handler;
 import com.tianji.common.utils.NumberUtils;
 import com.tianji.promotion.service.ICouponService;
 import com.xxl.job.core.context.XxlJobHelper;
-import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

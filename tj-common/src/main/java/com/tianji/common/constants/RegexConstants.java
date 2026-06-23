@@ -1,8 +1,6 @@
 package com.tianji.common.constants;
 
-import cn.hutool.core.lang.RegexPool;
-
-public interface RegexConstants extends RegexPool {
+public interface RegexConstants {
     /**
      * 手机号正则
      */

@@ -5,8 +5,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.CollUtils;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.message.constants.MessageErrorInfo;
 import com.tianji.message.domain.dto.MessageTemplateFormDTO;
 import com.tianji.message.domain.dto.NoticeTemplateDTO;
@@ -19,6 +17,8 @@ import com.tianji.message.mapper.NoticeTemplateMapper;
 import com.tianji.message.service.IMessageTemplateService;
 import com.tianji.message.service.INoticeTemplateService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,13 +31,13 @@ import java.util.stream.Collectors;
  * <p>
  * 通知模板 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-08-19
  */
 @Service
 @RequiredArgsConstructor
-public class NoticeTemplateServiceImpl extends ServiceImpl<NoticeTemplateMapper, NoticeTemplate> implements INoticeTemplateService {
+public class NoticeTemplateServiceImpl extends ServiceImpl<NoticeTemplateMapper, NoticeTemplate>
+        implements INoticeTemplateService {
 
     private final IMessageTemplateService messageTemplateService;
 
@@ -49,7 +49,7 @@ public class NoticeTemplateServiceImpl extends ServiceImpl<NoticeTemplateMapper,
         save(noticeTemplate);
         Long id = noticeTemplate.getId();
         // 2.判断是否有短信模板
-        if(!noticeTemplate.getIsSmsTemplate()){
+        if (!noticeTemplate.getIsSmsTemplate()) {
             return id;
         }
         // 3.保存短信模板
@@ -80,12 +80,12 @@ public class NoticeTemplateServiceImpl extends ServiceImpl<NoticeTemplateMapper,
         updateById(noticeTemplate);
         // 3.是否需要删除短信模板
         List<Long> deleteMessageTemplates = noticeTemplateDTO.getDeleteMessageTemplates();
-        if(CollUtils.isNotEmpty(deleteMessageTemplates)){
+        if (CollectionUtils.isNotEmpty(deleteMessageTemplates)) {
             messageTemplateService.removeByIds(deleteMessageTemplates);
         }
         // 4.是否有 新增或修改的短信模板
         List<MessageTemplateFormDTO> templateDTOS = noticeTemplateDTO.getMessageTemplates();
-        if(CollUtils.isEmpty(templateDTOS)){
+        if (CollectionUtils.isEmpty(templateDTOS)) {
             return;
         }
         // 5.数据处理
@@ -94,7 +94,7 @@ public class NoticeTemplateServiceImpl extends ServiceImpl<NoticeTemplateMapper,
         // 5.1.先查询当前通知模板有哪些平台的短信模板
         List<MessageTemplate> list = messageTemplateService.queryByNoticeTemplateId(id);
         Map<String, Long> mtMap = null;
-        if(CollUtils.isNotEmpty(list)){
+        if (CollectionUtils.isNotEmpty(list)) {
             mtMap = list.stream().collect(Collectors.toMap(MessageTemplate::getPlatformCode, MessageTemplate::getId));
         }
         // 5.2.判断是新增还是修改短信模板
@@ -104,26 +104,26 @@ public class NoticeTemplateServiceImpl extends ServiceImpl<NoticeTemplateMapper,
             template.setTemplateId(id);
             template.setName(noticeTemplate.getName());
             template.setContent(noticeTemplate.getContent());
-            if(template.getId() == null){
+            if (template.getId() == null) {
                 // 判断当前短信模板是否已经存在
-                if(mtMap != null && mtMap.containsKey(template.getPlatformCode())){
+                if (mtMap != null && mtMap.containsKey(template.getPlatformCode())) {
                     // 若已经存在，则改为更新
                     template.setId(mtMap.get(template.getPlatformCode()));
                     updateList.add(template);
-                }else {
+                } else {
                     // 不存在则新增
                     saveList.add(template);
                 }
-            }else{
+            } else {
                 updateList.add(template);
             }
         }
         // 5.3.新增短信模板
-        if(CollUtils.isNotEmpty(saveList)) {
+        if (CollectionUtils.isNotEmpty(saveList)) {
             messageTemplateService.saveBatch(saveList);
         }
         // 5.4.更新短信模板
-        if(CollUtils.isNotEmpty(updateList)) {
+        if (CollectionUtils.isNotEmpty(updateList)) {
             messageTemplateService.updateBatchById(updateList);
         }
     }
@@ -143,7 +143,7 @@ public class NoticeTemplateServiceImpl extends ServiceImpl<NoticeTemplateMapper,
 
     @Override
     public NoticeTemplateDTO queryNoticeTemplate(Long id) {
-        return BeanUtils.copyBean( getById(id), NoticeTemplateDTO.class);
+        return BeanUtils.copyBean(getById(id), NoticeTemplateDTO.class);
     }
 
     @Override

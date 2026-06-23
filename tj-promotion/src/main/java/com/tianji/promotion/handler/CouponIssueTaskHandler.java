@@ -1,13 +1,13 @@
 package com.tianji.promotion.handler;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.promotion.domain.po.Coupon;
 import com.tianji.promotion.enums.CouponStatus;
 import com.tianji.promotion.service.ICouponService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ public class CouponIssueTaskHandler {
     private final ICouponService couponService;
 
     @XxlJob("couponIssueJobHandler")
-    public void handleCouponIssueJob(){
+    public void handleCouponIssueJob() {
         // 1.获取分片信息，作为页码，每页最多查询 20条
         int index = XxlJobHelper.getShardIndex() + 1;
         int size = Integer.parseInt(XxlJobHelper.getJobParam());
@@ -31,7 +31,7 @@ public class CouponIssueTaskHandler {
                 .page(new Page<>(index, size));
         // 3.发放优惠券
         List<Coupon> records = page.getRecords();
-        if (CollUtils.isEmpty(records)) {
+        if (CollectionUtils.isEmpty(records)) {
             return;
         }
         couponService.beginIssueBatch(records);

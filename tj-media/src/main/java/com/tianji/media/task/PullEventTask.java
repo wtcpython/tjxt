@@ -8,7 +8,6 @@ import com.tianji.media.enums.FileStatus;
 import com.tianji.media.service.IMediaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -47,9 +46,11 @@ public class PullEventTask {
                 // 3.3.处理事件
                 if (PROCEDURE_EVENT.equals(eventType)) {
                     handleProcedureStateChangeEvent(ec);
-                } /*else if(UPLOAD_EVENT.equals(eventType)){
-                    handleUploadEvent(ec);
-                }*/
+                } /*
+                   * else if(UPLOAD_EVENT.equals(eventType)){
+                   * handleUploadEvent(ec);
+                   * }
+                   */
                 ehs.add(ec.getEventHandle());
             }
             ConfirmEventsRequest confirmReq = new ConfirmEventsRequest();
@@ -57,9 +58,9 @@ public class PullEventTask {
             vodClient.ConfirmEvents(confirmReq);
             log.info("事件处理完毕");
         } catch (TencentCloudSDKException e) {
-            if(e.getMessage().equals("no event")){
+            if (e.getMessage().equals("no event")) {
                 log.debug("暂无event事件");
-            }else{
+            } else {
                 log.error("VOD事件处理异常", e);
             }
         }

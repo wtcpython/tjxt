@@ -12,7 +12,6 @@ import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.pay.constants.NotifyStatus;
 import com.tianji.pay.domain.po.PayOrder;
 import com.tianji.pay.mapper.PayOrderMapper;
@@ -28,6 +27,7 @@ import com.tianji.pay.third.model.PrepayResponse;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -39,7 +39,6 @@ import static com.tianji.pay.sdk.constants.PayErrorInfo.*;
  * <p>
  * 支付订单 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-08-26
  */
@@ -253,8 +252,7 @@ public class PayOrderServiceImpl extends ServiceImpl<PayOrderMapper, PayOrder> i
                             .bizOrderId(payOrder.getBizOrderNo())
                             .payChannel(payOrder.getPayChannelCode())
                             .successTime(response.getSuccessTime())
-                            .build()
-            );
+                            .build());
         }
     }
 

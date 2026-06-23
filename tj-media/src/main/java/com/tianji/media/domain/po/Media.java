@@ -1,7 +1,5 @@
 package com.tianji.media.domain.po;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.tianji.media.enums.FileStatus;
@@ -16,7 +14,6 @@ import java.time.LocalDateTime;
  * <p>
  * 媒资表，主要是视频文件
  * </p>
- *
  * @author 虎哥
  * @since 2022-07-01
  */

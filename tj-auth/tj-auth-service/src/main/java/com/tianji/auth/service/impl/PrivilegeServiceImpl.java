@@ -1,6 +1,5 @@
 package com.tianji.auth.service.impl;
 
-import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.auth.common.domain.PrivilegeRoleDTO;
@@ -13,8 +12,8 @@ import com.tianji.auth.service.IRoleService;
 import com.tianji.auth.util.PrivilegeCache;
 import com.tianji.common.domain.query.PageQuery;
 import com.tianji.common.exceptions.CommonException;
-import com.tianji.common.utils.CollUtils;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,6 @@ import static com.tianji.auth.constants.AuthConstants.ADMIN_ROLE_ID;
  * <p>
  * 权限表，包括菜单权限和访问路径权限 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-06-15
  */
@@ -57,7 +55,7 @@ public class PrivilegeServiceImpl extends ServiceImpl<PrivilegeMapper, Privilege
                 .eq(Privilege::getMethod, p.getMethod())
                 .eq(Privilege::getUri, p.getUri())
                 .count();
-        if(count > 0){
+        if (count > 0) {
             // 已经存在，结束
             throw new CommonException(PRIVILEGE_EXISTS);
         }
@@ -70,7 +68,7 @@ public class PrivilegeServiceImpl extends ServiceImpl<PrivilegeMapper, Privilege
         rolePrivilegeService.save(rolePrivilege);
 
         // 4.添加缓存
-        privilegeCache.cacheSinglePrivilege(p, CollUtils.singletonSet(ADMIN_ROLE_ID));
+        privilegeCache.cacheSinglePrivilege(p, Collections.singleton(ADMIN_ROLE_ID));
     }
 
     @Override
@@ -118,7 +116,7 @@ public class PrivilegeServiceImpl extends ServiceImpl<PrivilegeMapper, Privilege
         List<RolePrivilege> rolePrivileges = rolePrivilegeService.lambdaQuery()
                 .eq(RolePrivilege::getRoleId, roleId)
                 .list();
-        if (CollectionUtil.isEmpty(rolePrivileges)) {
+        if (CollectionUtils.isEmpty(rolePrivileges)) {
             return Collections.emptySet();
         }
         return rolePrivileges.stream().map(RolePrivilege::getPrivilegeId).collect(Collectors.toSet());

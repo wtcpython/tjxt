@@ -1,12 +1,14 @@
 package com.tianji.common.utils;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -34,17 +36,17 @@ public class CookieBuilder {
     /**
      * 构建cookie，会对cookie值用UTF-8做URL编码，避免中文乱码
      */
-    public void build(){
+    public void build() {
         if (response == null) {
             log.error("response为null，无法写入cookie");
             return;
         }
         Cookie cookie = new Cookie(name, URLEncoder.encode(value, charset));
-        if(StringUtils.isNotBlank(domain)) {
+        if (StringUtils.isNotBlank(domain)) {
             cookie.setDomain(domain);
-        }else if (request != null) {
+        } else if (request != null) {
             String serverName = request.getServerName();
-            serverName = StringUtils.subAfter(serverName, ".", false);
+            serverName = StringUtils.substringAfter(serverName, ".");
             // cookie.setDomain("." + serverName);
             cookie.setDomain(serverName);
         }
@@ -61,7 +63,7 @@ public class CookieBuilder {
      * @param cookieValue cookie原始值
      * @return 解码后的值
      */
-    public String decode(String cookieValue){
+    public String decode(String cookieValue) {
         return URLDecoder.decode(cookieValue, charset);
     }
 }

@@ -3,10 +3,10 @@ package com.tianji.api.cache;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.tianji.api.client.course.CategoryClient;
 import com.tianji.api.dto.course.CategoryBasicDTO;
-import com.tianji.common.utils.CollUtils;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -24,7 +24,7 @@ public class CategoryCache {
             // 1.从CategoryClient查询
             List<CategoryBasicDTO> list = categoryClient.getAllOfOneLevel();
             if (list == null || list.isEmpty()) {
-                return CollUtils.emptyMap();
+                return Collections.emptyMap();
             }
             // 2.转换数据
             return list.stream().collect(Collectors.toMap(CategoryBasicDTO::getId, Function.identity()));
@@ -48,7 +48,7 @@ public class CategoryCache {
 
     public List<String> getCategoryNameList(List<Long> ids) {
         if (ids == null || ids.size() == 0) {
-            return CollUtils.emptyList();
+            return Collections.emptyList();
         }
         // 1.读取分类缓存
         Map<Long, CategoryBasicDTO> map = getCategoryMap();
@@ -63,7 +63,7 @@ public class CategoryCache {
 
     public List<CategoryBasicDTO> queryCategoryByIds(List<Long> ids) {
         if (ids == null || ids.size() == 0) {
-            return CollUtils.emptyList();
+            return Collections.emptyList();
         }
         Map<Long, CategoryBasicDTO> map = getCategoryMap();
         return ids.stream()

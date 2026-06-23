@@ -1,7 +1,7 @@
 package com.tianji.promotion.utils;
 
-import com.tianji.common.utils.BooleanUtils;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.concurrent.TimeUnit;
@@ -12,7 +12,7 @@ public class RedisLock {
     private final String key;
     private final StringRedisTemplate redisTemplate;
 
-    public boolean tryLock(long leaseTime, TimeUnit unit){
+    public boolean tryLock(long leaseTime, TimeUnit unit) {
         // 1.获取线程名称
         String value = Thread.currentThread().getName();
         // 2.获取锁
@@ -21,7 +21,7 @@ public class RedisLock {
         return BooleanUtils.isTrue(success);
     }
 
-    public void unlock(){
+    public void unlock() {
         redisTemplate.delete(key);
     }
 }

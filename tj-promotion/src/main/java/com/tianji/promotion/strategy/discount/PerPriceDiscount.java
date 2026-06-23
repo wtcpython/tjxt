@@ -1,14 +1,14 @@
 package com.tianji.promotion.strategy.discount;
 
 import com.tianji.common.utils.NumberUtils;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.promotion.domain.po.Coupon;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 @RequiredArgsConstructor
 public class PerPriceDiscount implements Discount {
 
-    private final static String RULE_TEMPLATE = "每满{}减{}，上限{}";
+    private final static String RULE_TEMPLATE = "每满%s减%s，上限%s";
 
     @Override
     public boolean canUse(int totalAmount, Coupon coupon) {
@@ -29,7 +29,7 @@ public class PerPriceDiscount implements Discount {
 
     @Override
     public String getRule(Coupon coupon) {
-        return StringUtils.format(
+        return String.format(
                 RULE_TEMPLATE,
                 NumberUtils.scaleToStr(coupon.getThresholdAmount(), 2),
                 NumberUtils.scaleToStr(coupon.getDiscountValue(), 2),

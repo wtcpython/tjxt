@@ -1,7 +1,5 @@
 package com.tianji.auth.controller;
 
-
-import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.tianji.auth.domain.dto.PrivilegeDTO;
 import com.tianji.auth.domain.po.Privilege;
@@ -13,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
  * <p>
  * 权限表，包括菜单权限和访问路径权限 前端控制器
  * </p>
- *
  * @author 虎哥
  * @since 2022-06-15
  */
@@ -39,7 +37,6 @@ public class PrivilegeController {
 
     /**
      * 分页查询所有权限
-     *
      * @param pageQuery 分页查询条件
      * @return 分页结果
      */
@@ -50,7 +47,7 @@ public class PrivilegeController {
         Page<Privilege> page = privilegesService.listPrivilegesByPage(pageQuery);
         // 2.非空判断
         List<Privilege> list = page.getRecords();
-        if (CollectionUtil.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             // 结果为空，返回空结果 添加总页码数
             return new PageDTO<>(page.getTotal(), page.getPages(), Collections.emptyList());
         }
@@ -62,21 +59,19 @@ public class PrivilegeController {
 
     /**
      * 查询所有权限，作为下拉选框菜单
-     *
      * @return 分页结果
      */
     @Operation(summary = "查询菜单下的所有权限，作为下拉选框菜单")
     @GetMapping("options/{menuId}")
     public List<PrivilegeOptionVO> listAllPrivilegesOptionsByMenuId(
-            @Parameter(name = "菜单id", example = "1") @PathVariable("menuId") Long menuId
-    ) {
+            @Parameter(name = "菜单id", example = "1") @PathVariable("menuId") Long menuId) {
         // 1.查询菜单下的权限
         List<Privilege> list = privilegesService.lambdaQuery()
                 .eq(Privilege::getMenuId, menuId)
                 .eq(Privilege::getInternal, false)
                 .list();
         // 2.非空判断
-        if (CollectionUtil.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             // 结果为空，返回空结果
             return Collections.emptyList();
         }
@@ -87,18 +82,16 @@ public class PrivilegeController {
 
     /**
      * 查询某个角色的权限
-     *
      * @return 某个角色的权限列表
      */
     @Operation(summary = "查询菜单下的权限列表，某个角色的权限")
     @GetMapping("/roles/{roleId}/{menuId}")
     public List<PrivilegeOptionVO> listPrivilegeByRoleId(
             @Parameter(name = "角色id", required = true, example = "1") @PathVariable("roleId") Long roleId,
-            @Parameter(name = "菜单id", required = true, example = "1") @PathVariable("menuId") Long menuId
-    ) {
+            @Parameter(name = "菜单id", required = true, example = "1") @PathVariable("menuId") Long menuId) {
         // 1.查询角色对应的权限id
         Set<Long> privilegeIds = privilegesService.listPrivilegeByRoleId(roleId);
-        if (CollectionUtil.isEmpty(privilegeIds)) {
+        if (CollectionUtils.isEmpty(privilegeIds)) {
             return Collections.emptyList();
         }
         // 2.查询菜单下所有权限
@@ -112,7 +105,6 @@ public class PrivilegeController {
 
     /**
      * 新增权限
-     *
      * @param privilegeDTO 权限数据
      * @return 新增成功的权限数据
      */
@@ -129,7 +121,6 @@ public class PrivilegeController {
 
     /**
      * 修改权限
-     *
      * @param privilegeDTO 权限数据
      * @param id           要修改的权限的id
      * @return 修改后的权限结果
@@ -150,7 +141,6 @@ public class PrivilegeController {
 
     /**
      * 删除权限
-     *
      * @param id 权限id
      */
     @Operation(summary = "删除权限")
@@ -162,7 +152,6 @@ public class PrivilegeController {
 
     /**
      * 绑定角色与API权限
-     *
      * @param roleId       角色id
      * @param privilegeIds 权限id集合
      */
@@ -176,7 +165,6 @@ public class PrivilegeController {
 
     /**
      * 解除角色的API权限
-     *
      * @param roleId       角色id
      * @param privilegeIds 权限id集合
      */
@@ -187,6 +175,5 @@ public class PrivilegeController {
             @Parameter(name = "API权限的id集合") List<Long> privilegeIds) {
         privilegesService.deleteRolePrivileges(roleId, privilegeIds);
     }
-
 
 }

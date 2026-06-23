@@ -76,6 +76,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-jwt</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
         <!--阿里云OSS的SDK-->
         <dependency>
             <groupId>com.aliyun.oss</groupId>

@@ -2,7 +2,6 @@ package com.tianji.learning.domain.query;
 
 import com.tianji.common.domain.query.PageQuery;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

@@ -1,7 +1,5 @@
 package com.tianji.trade.service.impl;
 
-import cn.hutool.core.convert.Convert;
-import cn.hutool.db.DbRuntimeException;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,6 +11,7 @@ import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.constants.ErrorInfo;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
+import com.tianji.common.exceptions.DbException;
 import com.tianji.common.utils.*;
 import com.tianji.pay.sdk.client.PayClient;
 import com.tianji.pay.sdk.constants.PayChannel;
@@ -31,6 +30,8 @@ import com.tianji.trade.mapper.OrderMapper;
 import com.tianji.trade.mapper.RefundApplyMapper;
 import com.tianji.trade.service.IOrderDetailService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +46,6 @@ import static com.tianji.trade.constants.TradeErrorInfo.ORDER_NOT_EXISTS;
  * <p>
  * 订单明细 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-08-29
  */
@@ -71,7 +71,7 @@ public class OrderDetailServiceImpl extends ServiceImpl<OrderDetailMapper, Order
                 .eq(OrderDetail::getOrderId, orderId)
                 .update();
         if (!success) {
-            throw new DbRuntimeException(ErrorInfo.Msg.DB_UPDATE_EXCEPTION);
+            throw new DbException(ErrorInfo.Msg.DB_UPDATE_EXCEPTION);
         }
     }
 
@@ -110,7 +110,7 @@ public class OrderDetailServiceImpl extends ServiceImpl<OrderDetailMapper, Order
                 .page(p);
         // 4.判断是否为空
         List<OrderDetail> records = page.getRecords();
-        if (CollUtils.isEmpty(records)) {
+        if (CollectionUtils.isEmpty(records)) {
             return PageDTO.empty(page);
         }
         // 5.查询订单中的用户信息
@@ -210,8 +210,7 @@ public class OrderDetailServiceImpl extends ServiceImpl<OrderDetailMapper, Order
         vo.setCanRefund(
                 (OrderStatus.canRefund(detail.getStatus()) && refundApply == null) ||
                         (refundApply != null && refundApplyList.size() == 1 &&
-                                !RefundStatus.inProgress(refundApply.getStatus()))
-        );
+                                !RefundStatus.inProgress(refundApply.getStatus())));
         return vo;
     }
 
@@ -285,7 +284,7 @@ public class OrderDetailServiceImpl extends ServiceImpl<OrderDetailMapper, Order
                 .list();
 
         // 3.判断是否存在订单
-        if (CollUtils.isEmpty(orders)) {
+        if (CollectionUtils.isEmpty(orders)) {
             return false;
         }
 
@@ -338,6 +337,7 @@ public class OrderDetailServiceImpl extends ServiceImpl<OrderDetailMapper, Order
         // 3.统计销售额
         int realPayAmount = baseMapper.countRealPayAmountByCourseId(courseId);
 
-        return new CoursePurchaseInfoDTO(Convert.toInt(enrollNum), Convert.toInt(refundNum), realPayAmount);
+        return new CoursePurchaseInfoDTO(enrollNum == null ? 0 : Math.toIntExact(enrollNum),
+                refundNum == null ? 0 : Math.toIntExact(refundNum), realPayAmount);
     }
 }

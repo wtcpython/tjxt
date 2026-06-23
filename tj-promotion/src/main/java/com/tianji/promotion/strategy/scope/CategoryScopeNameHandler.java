@@ -2,9 +2,9 @@ package com.tianji.promotion.strategy.scope;
 
 import com.tianji.api.cache.CategoryCache;
 import com.tianji.common.exceptions.BizIllegalException;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.promotion.constants.ScopeType;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class CategoryScopeNameHandler implements ScopeNameHandler {
     @Override
     public List<String> getNameByIds(List<Long> scopeIds) {
         List<String> names = categoryCache.getNameByLv3Ids(scopeIds);
-        if (CollUtils.isEmpty(names)) {
+        if (CollectionUtils.isEmpty(names)) {
             throw new BizIllegalException("分类信息不存在");
         }
         return names;

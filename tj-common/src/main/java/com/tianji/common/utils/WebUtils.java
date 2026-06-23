@@ -1,24 +1,24 @@
 package com.tianji.common.utils;
 
-
 import com.tianji.common.constants.Constant;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import java.util.Collection;
+
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class WebUtils {
 
     /**
      * 获取ServletRequestAttributes
-     *
      * @return ServletRequestAttributes
      */
     public static ServletRequestAttributes getServletRequestAttributes() {
@@ -31,7 +31,6 @@ public class WebUtils {
 
     /**
      * 获取request
-     *
      * @return HttpServletRequest
      */
     public static HttpServletRequest getRequest() {
@@ -41,7 +40,6 @@ public class WebUtils {
 
     /**
      * 获取response
-     *
      * @return HttpServletResponse
      */
     public static HttpServletResponse getResponse() {
@@ -51,7 +49,6 @@ public class WebUtils {
 
     /**
      * 获取request header中的内容
-     *
      * @param headerName 请求头名称
      * @return 请求头的值
      */
@@ -70,7 +67,6 @@ public class WebUtils {
         }
         response.setHeader(key, value);
     }
-
 
     public static String getRequestId() {
         return getHeader(Constant.REQUEST_ID_HEADER);
@@ -93,8 +89,8 @@ public class WebUtils {
 
     /**
      * 获取请求地址中的请求参数组装成 key1=value1&key2=value2
-     * 如果key对应多个值，中间使用逗号隔开例如 key1对应value1，key2对应value2，value3， key1=value1&key2=value2,value3
-     *
+     * 如果key对应多个值，中间使用逗号隔开例如 key1对应value1，key2对应value2，value3，
+     * key1=value1&key2=value2,value3
      * @param request
      * @return 返回拼接字符串
      */
@@ -105,8 +101,8 @@ public class WebUtils {
 
     /**
      * 获取请求地址中的请求参数组装成 key1=value1&key2=value2
-     * 如果key对应多个值，中间使用逗号隔开例如 key1对应value1，key2对应value2，value3， key1=value1&key2=value2,value3
-     *
+     * 如果key对应多个值，中间使用逗号隔开例如 key1对应value1，key2对应value2，value3，
+     * key1=value1&key2=value2,value3
      * @param queries
      * @return
      */
@@ -117,9 +113,9 @@ public class WebUtils {
                 buffer.append(entry.getKey()).append(String.join(",", ((String[]) entry.getValue())))
                         .append("&");
             } else if (entry.getValue() instanceof Collection) {
-                buffer.append(entry.getKey()).append(
-                        CollUtils.join(((Collection<String>) entry.getValue()), ",")
-                ).append("&");
+                Collection<String> values = (Collection<String>) entry.getValue();
+                buffer.append(entry.getKey())
+                        .append(values.stream().map(String::valueOf).collect(Collectors.joining(","))).append("&");
             }
         }
         return buffer.length() > 0 ? buffer.substring(0, buffer.length() - 1) : StringUtils.EMPTY;
@@ -127,7 +123,6 @@ public class WebUtils {
 
     /**
      * 获取请求url中的uri
-     *
      * @param url
      * @return
      */
@@ -137,14 +132,14 @@ public class WebUtils {
         }
 
         String uri = url;
-        //uri中去掉 http:// 或者https
+        // uri中去掉 http:// 或者https
         if (uri.contains("http://")) {
             uri = uri.replace("http://", StringUtils.EMPTY);
         } else if (uri.contains("https://")) {
             uri = uri.replace("https://", StringUtils.EMPTY);
         }
 
-        int endIndex = uri.length(); //uri 在url中的最后一个字符的序号+1
+        int endIndex = uri.length(); // uri 在url中的最后一个字符的序号+1
         if (uri.contains("?")) {
             endIndex = uri.indexOf("?");
         }

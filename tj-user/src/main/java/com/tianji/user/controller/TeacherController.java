@@ -6,7 +6,7 @@ import com.tianji.user.domain.vo.TeacherPageVO;
 import com.tianji.user.service.ITeacherService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,14 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/teachers")
 @Tag(name = "用户管理接口")
+@RequiredArgsConstructor
 public class TeacherController {
 
-    @Autowired
-    private ITeacherService teacherService;
+    private final ITeacherService teacherService;
 
     @GetMapping("/page")
     @Operation(summary = "分页查询教师信息")
-    public PageDTO<TeacherPageVO> queryTeacherPage(UserPageQuery pageQuery){
+    public PageDTO<TeacherPageVO> queryTeacherPage(UserPageQuery pageQuery) {
         return teacherService.queryTeacherPage(pageQuery);
     }
 }

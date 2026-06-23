@@ -5,7 +5,6 @@ import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.LoginUserDTO;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.user.constants.UserErrorInfo;
 import com.tianji.user.domain.dto.UserFormDTO;
 import com.tianji.user.domain.po.User;
@@ -18,9 +17,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -30,29 +31,28 @@ import java.util.List;
 @RestController
 @RequestMapping("users")
 @Tag(name = "用户管理接口")
+@RequiredArgsConstructor
 public class UserController {
 
-    @Autowired
-    private IUserService userService;
-    @Autowired
-    private IUserDetailService detailService;
+    private final IUserService userService;
+    private final IUserDetailService detailService;
 
     @Operation(summary = "新增用户，一般是员工或教师")
     @PostMapping
-    public Long saveUser(@Valid @RequestBody UserDTO userDTO){
+    public Long saveUser(@Valid @RequestBody UserDTO userDTO) {
         userDTO.setId(null);
         return userService.saveUser(userDTO);
     }
 
     @Operation(summary = "更新用户信息")
     @PutMapping("/{id}")
-    public void updateUser(@RequestBody UserDTO userDTO){
+    public void updateUser(@RequestBody UserDTO userDTO) {
         userService.updateUser(userDTO);
     }
 
     @Operation(summary = "更新当前登录用户信息，可修改密码")
     @PutMapping
-    public void updateCurrentUser(@Valid @RequestBody UserFormDTO userDTO){
+    public void updateCurrentUser(@Valid @RequestBody UserFormDTO userDTO) {
         userService.updateUserWithPassword(userDTO);
     }
 
@@ -67,8 +67,7 @@ public class UserController {
     @PutMapping("/{id}/status/{status}")
     public void updateUserStatus(
             @Parameter(description = "要重置的用户的id", example = "1") @PathVariable("id") Long userId,
-            @Parameter(description = "状态", example = "1") @PathVariable("status") Integer status
-    ) {
+            @Parameter(description = "状态", example = "1") @PathVariable("status") Integer status) {
         User user = new User();
         user.setId(userId);
         user.setStatus(UserStatus.of(status));
@@ -92,7 +91,7 @@ public class UserController {
     /**
      * 登录结构
      * @param loginDTO 登录表单
-     * @param isStaff 是否是后台登录
+     * @param isStaff  是否是后台登录
      * @return 登录用户信息
      */
     @Operation(hidden = true)
@@ -104,7 +103,6 @@ public class UserController {
 
     /**
      * 根据id批量查询用户信息
-     *
      * @param ids 用户id集合
      * @return 用户集合
      */
@@ -112,8 +110,8 @@ public class UserController {
     @GetMapping("/list")
     public List<UserDTO> queryUserByIds(
             @Parameter(description = "用户id的列表") @RequestParam("ids") List<Long> ids) {
-        if(CollUtils.isEmpty(ids)){
-            return CollUtils.emptyList();
+        if (CollectionUtils.isEmpty(ids)) {
+            return Collections.emptyList();
         }
         // 1.查询列表
         List<UserDetail> list = detailService.queryByIds(ids);
@@ -123,7 +121,6 @@ public class UserController {
 
     /**
      * 查询用户类型
-     *
      * @param id 用户id
      * @return 用户类型，0-普通学员，1-老师，2-其他员工
      */
@@ -150,7 +147,7 @@ public class UserController {
 
     @Operation(summary = "检查用户手机号是否存在")
     @GetMapping("checkCellphone")
-    public Boolean checkCellPhone(@RequestParam("cellphone") String cellPhone){
+    public Boolean checkCellPhone(@RequestParam("cellphone") String cellPhone) {
         return userService.lambdaQuery()
                 .eq(User::getCellPhone, cellPhone)
                 // .in(User::getType, UserType.STAFF, UserType.TEACHER)

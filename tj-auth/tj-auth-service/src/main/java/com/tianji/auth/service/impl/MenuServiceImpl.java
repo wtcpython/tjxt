@@ -1,6 +1,5 @@
 package com.tianji.auth.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.auth.constants.AuthConstants;
@@ -15,6 +14,7 @@ import com.tianji.auth.service.IRoleService;
 import com.tianji.common.exceptions.CommonException;
 import com.tianji.common.utils.UserContext;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +30,6 @@ import static com.tianji.auth.common.constants.AuthErrorInfo.Msg.ROLE_NOT_FOUND;
  * <p>
  * 权限表，包括菜单权限和访问路径权限 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-06-16
  */
@@ -48,7 +47,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
         Long userId = UserContext.getUser();
         // 2.查询角色
         List<AccountRole> accountRoles = accountRoleService.lambdaQuery().eq(AccountRole::getAccountId, userId).list();
-        if (CollUtil.isEmpty(accountRoles)) {
+        if (CollectionUtils.isEmpty(accountRoles)) {
             return Collections.emptyList();
         }
         List<Long> roleIds = accountRoles.stream().map(AccountRole::getRoleId).collect(Collectors.toList());
@@ -62,10 +61,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
         // 1.新增菜单
         save(menu);
         // 2.判断当前菜单是否有父菜单
-        if(menu.getParentId() != 0) {
+        if (menu.getParentId() != 0) {
             // 有父菜单，需要判断父菜单hashChildren属性
             Menu parent = getById(menu.getParentId());
-            if(!parent.getHasChildren()){
+            if (!parent.getHasChildren()) {
                 // 更新父菜单的hasChildren属性
                 parent.setHasChildren(true);
                 parent.setUpdateTime(null);
@@ -99,7 +98,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
                     .collect(Collectors.toList());
             // 添加父菜单id
             delIds.add(id);
-        }else {
+        } else {
             // 2.2.添加父菜单id
             delIds = Collections.singletonList(id);
         }

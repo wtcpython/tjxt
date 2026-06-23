@@ -4,13 +4,15 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.tianji.common.utils.CollUtils;
-import com.tianji.common.utils.StringUtils;
+import com.tianji.common.utils.NumberUtils;
 import lombok.*;
 import lombok.experimental.Accessors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,7 +21,6 @@ import java.util.stream.Stream;
  * <p>
  * 题目
  * </p>
- *
  * @author wusongsong
  * @since 2022-07-15
  */
@@ -167,6 +168,10 @@ public class Subject implements Serializable {
     }
 
     public List<Integer> getAnswers() {
-        return CollUtils.convertToInteger(StringUtils.split(answer, ","));
+        String[] arr = StringUtils.split(answer, ",");
+        if (arr == null) {
+            return null;
+        }
+        return Arrays.stream(arr).map(NumberUtils::parseInt).collect(Collectors.toList());
     }
 }

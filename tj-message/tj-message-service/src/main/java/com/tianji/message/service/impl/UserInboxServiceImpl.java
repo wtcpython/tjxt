@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.PageDTO;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.message.config.MessageProperties;
 import com.tianji.message.domain.dto.UserInboxDTO;
@@ -19,6 +18,7 @@ import com.tianji.message.mapper.UserInboxMapper;
 import com.tianji.message.service.IPublicNoticeService;
 import com.tianji.message.service.IUserInboxService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +30,6 @@ import java.util.List;
  * <p>
  * 用户通知记录 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-08-19
  */
@@ -73,7 +72,7 @@ public class UserInboxServiceImpl extends ServiceImpl<UserInboxMapper, UserInbox
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime minTime = now.minusMonths(properties.getNoticeTtlMonths());
         // 2.2.如果有最后一条公告，判断公告时间是不是比最早时间要晚
-        if(latest != null && latest.getPushTime().isAfter(minTime)){
+        if (latest != null && latest.getPushTime().isAfter(minTime)) {
             // 用户上次加载时间比最早时间晚，更新一下时间
             minTime = latest.getPushTime();
         }
@@ -84,7 +83,7 @@ public class UserInboxServiceImpl extends ServiceImpl<UserInboxMapper, UserInbox
                 .ge(PublicNotice::getPushTime, minTime)
                 .page(page);
         // 4.将公告写入用户收件箱
-        if (CollUtils.isNotEmpty(page.getRecords())) {
+        if (CollectionUtils.isNotEmpty(page.getRecords())) {
             saveNoticeListToInbox(page.getRecords(), userId);
         }
         // 5.分页查询收件箱信息并返回

@@ -5,7 +5,6 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -26,11 +25,11 @@ public class AuthApplication {
             protocol = "https";
         }
         log.info("--/\n---------------------------------------------------------------------------------------\n\t" +
-                        "Application '{}' is running! Access URLs:\n\t" +
-                        "Local: \t\t{}://localhost:{}\n\t" +
-                        "External: \t{}://{}:{}\n\t" +
-                        "Profile(s): \t{}" +
-                        "\n---------------------------------------------------------------------------------------",
+                "Application '{}' is running! Access URLs:\n\t" +
+                "Local: \t\t{}://localhost:{}\n\t" +
+                "External: \t{}://{}:{}\n\t" +
+                "Profile(s): \t{}" +
+                "\n---------------------------------------------------------------------------------------",
                 env.getProperty("spring.application.name"),
                 protocol,
                 env.getProperty("server.port"),
@@ -38,6 +37,6 @@ public class AuthApplication {
                 InetAddress.getLocalHost().getHostAddress(),
                 env.getProperty("server.port"),
                 env.getActiveProfiles());
-        log.info("--/\n------------------------------------------------------------------------------\n\t" );
+        log.info("--/\n------------------------------------------------------------------------------\n\t");
     }
 }

@@ -2,6 +2,8 @@ package com.tianji.common.utils;
 
 import cn.hutool.core.util.NumberUtil;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
@@ -9,43 +11,39 @@ import java.util.stream.Collectors;
 
 public class NumberUtils extends NumberUtil {
 
-
     /**
      * 如果number为空，将number转换为0，否则原数字返回
-     *
      * @param number 原数值
      * @return 整型数字，0或原数字
      */
-    public static Integer null2Zero(Integer number){
+    public static Integer null2Zero(Integer number) {
         return number == null ? 0 : number;
     }
 
     /**
      * 如果number为空，将number转换为0，否则原数字返回
-     *
      * @param number 原数值
      * @return 整型数字，0或原数字
      */
-    public static Double null2Zero(Double number){
+    public static Double null2Zero(Double number) {
         return number == null ? 0 : number;
     }
 
     /**
      * 如果number为空，将number转换为0L，否则原数字返回
-     *
-     * @param number  原数值
+     * @param number 原数值
      * @return 长整型数字，0L或原数字
      */
-    public static Long null2Zero(Long number){
+    public static Long null2Zero(Long number) {
         return number == null ? 0L : number;
     }
-
 
     public static Double setScale(Double number) {
         return new BigDecimal(number)
                 .setScale(2, BigDecimal.ROUND_HALF_UP)
                 .doubleValue();
     }
+
     /**
      * 比较两个数字是否相同，
      * @param number1 数值1
@@ -53,7 +51,7 @@ public class NumberUtils extends NumberUtil {
      * @return 是否一致
      */
     public static boolean equals(Integer number1, Integer number2) {
-        if(number1 == null || number2 == null){
+        if (number1 == null || number2 == null) {
             return false;
         }
         return number1.equals(number2);
@@ -61,28 +59,29 @@ public class NumberUtils extends NumberUtil {
 
     /**
      * 数字除法保留指定小数位
-     * @param num1 被除数
-     * @param num2 除数
+     * @param num1  被除数
+     * @param num2  除数
      * @param scale 小数点位数
      * @return 结果
      */
-    public static Double divToDouble(Integer num1, Integer num2, int scale){
-        if(num2 == null || num2 ==0 || num1 == null || num1 == 0) {
+    public static Double divToDouble(Integer num1, Integer num2, int scale) {
+        if (num2 == null || num2 == 0 || num1 == null || num1 == 0) {
             return 0d;
         }
         return div(num1, num2, scale).doubleValue();
     }
 
-    public static  Double max(List<Double> data){
-        if(CollUtils.isEmpty(data)){
+    public static Double max(List<Double> data) {
+        if (CollectionUtils.isEmpty(data)) {
             return null;
         }
         return data.stream()
                 .max(Comparator.comparingDouble(num -> num))
                 .orElse(0d);
     }
-    public static  Double min(List<Double> data){
-        if(CollUtils.isEmpty(data)){
+
+    public static Double min(List<Double> data) {
+        if (CollectionUtils.isEmpty(data)) {
             return null;
         }
         return data.stream()
@@ -90,8 +89,8 @@ public class NumberUtils extends NumberUtil {
                 .orElse(0d);
     }
 
-    public static Double average(List<Double> data){
-        if(CollUtils.isEmpty(data)){
+    public static Double average(List<Double> data) {
+        if (CollectionUtils.isEmpty(data)) {
             return 0d;
         }
         return data.stream()
@@ -102,7 +101,8 @@ public class NumberUtils extends NumberUtil {
     public static Integer toInt(Object obj) {
         return obj == null ? null
                 : obj instanceof Integer
-                ? (int) obj : null;
+                        ? (int) obj
+                        : null;
     }
 
     /**
@@ -118,19 +118,17 @@ public class NumberUtils extends NumberUtil {
 
     /**
      * 数字格式化字符串，不足位数补0
-     *
      * @param originNumber 原始数字
-     * @param digit 数字位数
+     * @param digit        数字位数
      * @return 字符串
      */
-    public static String  repair0(Integer originNumber, Integer digit){
+    public static String repair0(Integer originNumber, Integer digit) {
         StringBuilder number = new StringBuilder(originNumber + "");
         while (number.length() < digit) {
             number.insert(0, "0");
         }
         return number.toString();
     }
-
 
     public static String scaleToStr(Integer num, int offset) {
         // 1.计算位数

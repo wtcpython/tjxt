@@ -2,7 +2,6 @@ package com.tianji.learning.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.DateUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.learning.constants.RedisConstants;
@@ -12,23 +11,25 @@ import com.tianji.learning.enums.PointsRecordType;
 import com.tianji.learning.mapper.PointsRecordMapper;
 import com.tianji.learning.service.IPointsRecordService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * <p>
  * 学习积分记录，每个月底清零 服务实现类
  * </p>
- *
  * @author 虎哥
  */
 @Service
 @RequiredArgsConstructor
-public class PointsRecordServiceImpl extends ServiceImpl<PointsRecordMapper, PointsRecord> implements IPointsRecordService {
+public class PointsRecordServiceImpl extends ServiceImpl<PointsRecordMapper, PointsRecord>
+        implements IPointsRecordService {
 
     private final StringRedisTemplate redisTemplate;
 
@@ -38,19 +39,19 @@ public class PointsRecordServiceImpl extends ServiceImpl<PointsRecordMapper, Poi
         int maxPoints = type.getMaxPoints();
         // 1.判断当前方式有没有积分上限
         int realPoints = points;
-        if(maxPoints > 0) {
+        if (maxPoints > 0) {
             // 2.有，则需要判断是否超过上限
             LocalDateTime begin = DateUtils.getDayStartTime(now);
             LocalDateTime end = DateUtils.getDayEndTime(now);
             // 2.1.查询今日已得积分
             int currentPoints = queryUserPointsByTypeAndDate(userId, type, begin, end);
             // 2.2.判断是否超过上限
-            if(currentPoints >= maxPoints) {
+            if (currentPoints >= maxPoints) {
                 // 2.3.超过，直接结束
                 return;
             }
             // 2.4.没超过，保存积分记录
-            if(currentPoints + points > maxPoints){
+            if (currentPoints + points > maxPoints) {
                 realPoints = maxPoints - currentPoints;
             }
         }
@@ -80,8 +81,8 @@ public class PointsRecordServiceImpl extends ServiceImpl<PointsRecordMapper, Poi
                 .between(PointsRecord::getCreateTime, begin, end);
         // 4.查询
         List<PointsRecord> list = getBaseMapper().queryUserPointsByDate(wrapper);
-        if (CollUtils.isEmpty(list)) {
-            return CollUtils.emptyList();
+        if (CollectionUtils.isEmpty(list)) {
+            return Collections.emptyList();
         }
         // 5.封装返回
         List<PointsStatisticsVO> vos = new ArrayList<>(list.size());

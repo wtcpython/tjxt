@@ -3,7 +3,7 @@ package com.tianji.pay.third.wx;
 import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.tianji.common.utils.JsonUtils;
-import com.tianji.common.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.tianji.pay.sdk.constants.PayConstants;
 import com.tianji.pay.third.IPayService;
 import com.tianji.pay.third.model.PayStatusResponse;
@@ -69,7 +69,7 @@ public class WxPayService implements IPayService {
         String message = result.getStr("message");
         LocalDateTime successTime = result.getLocalDateTime("success_time", LocalDateTime.now());
         // 3.1.请求异常
-        if(StringUtils.isNotBlank(code)){
+        if (StringUtils.isNotBlank(code)) {
             return PayStatusResponse.builder().success(false).code(code).msg(message).build();
         }
         // 3.2.请求成功
@@ -80,12 +80,12 @@ public class WxPayService implements IPayService {
                 .msg(result.getStr("trade_state_desc"))
                 .totalAmount(result.getJSONObject("amount").getInt("total"))
                 .successTime(successTime)
-                .build()
-                ;
+                .build();
     }
 
     @Override
-    public RefundResponse refundOrder(String payOrderNo, String refundOrderNo, Integer refundAmount, Integer totalAmount) {
+    public RefundResponse refundOrder(String payOrderNo, String refundOrderNo, Integer refundAmount,
+            Integer totalAmount) {
         // 1.请求地址
         String requestPath = "https://api.mch.weixin.qq.com/v3/refund/domestic/refunds";
         // 2.准备请求参数
@@ -95,8 +95,7 @@ public class WxPayService implements IPayService {
         baseParam.putObject("amount")
                 .put("refund", refundAmount)
                 .put("total", totalAmount)
-                .put("currency", "CNY")
-        ;
+                .put("currency", "CNY");
         // 3.发送请求
         String responseJson = wxPayClient.doPostJson(requestPath, baseParam);
         // 4.解析
@@ -104,7 +103,7 @@ public class WxPayService implements IPayService {
         String code = result.getStr("code");
         String message = result.getStr("message");
         // 4.1.请求异常
-        if(StringUtils.isNotBlank(code)){
+        if (StringUtils.isNotBlank(code)) {
             return RefundResponse.builder().success(false).code(code).msg(message).build();
         }
         // 4.2.请求成功
@@ -129,7 +128,7 @@ public class WxPayService implements IPayService {
         String code = result.getStr("code");
         String message = result.getStr("message");
         // 3.1.请求异常
-        if(StringUtils.isNotBlank(code)){
+        if (StringUtils.isNotBlank(code)) {
             return RefundResponse.builder().success(false).code(code).msg(message).build();
         }
         // 3.2.请求成功

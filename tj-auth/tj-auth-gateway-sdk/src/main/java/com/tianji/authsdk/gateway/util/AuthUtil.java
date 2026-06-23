@@ -1,21 +1,19 @@
 package com.tianji.authsdk.gateway.util;
 
-
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.exceptions.ValidateException;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
-import cn.hutool.jwt.JWT;
-import cn.hutool.jwt.JWTValidator;
 import com.tianji.auth.common.domain.PrivilegeRoleDTO;
 import com.tianji.common.domain.R;
 import com.tianji.common.domain.dto.LoginUserDTO;
 import com.tianji.common.exceptions.ForbiddenException;
 import com.tianji.common.exceptions.UnauthorizedException;
-import com.tianji.common.utils.StringUtils;
+import com.tianji.common.utils.JsonUtils;
+
+import cn.hutool.core.exceptions.ValidateException;
+import cn.hutool.json.JSONObject;
+import cn.hutool.jwt.JWT;
+import cn.hutool.jwt.JWTValidator;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -51,7 +49,7 @@ public class AuthUtil {
 
     public R<LoginUserDTO> parseToken(String token) {
         // 1.校验token是否为空
-        if(StringUtils.isBlank(token)){
+        if (StringUtils.isBlank(token)) {
             return R.error(INVALID_TOKEN_CODE, INVALID_TOKEN);
         }
         JWT jwt = null;
@@ -81,7 +79,7 @@ public class AuthUtil {
         // 5.数据解析
         LoginUserDTO userDTO;
         try {
-            userDTO = ((JSONObject)userPayload).toBean(LoginUserDTO.class);
+            userDTO = ((JSONObject) userPayload).toBean(LoginUserDTO.class);
         } catch (RuntimeException e) {
             // token格式有误
             return R.error(INVALID_TOKEN_CODE, INVALID_TOKEN_PAYLOAD);
@@ -91,15 +89,15 @@ public class AuthUtil {
         return R.ok(userDTO);
     }
 
-    public void checkAuth(String antPath, R<LoginUserDTO> r){
+    public void checkAuth(String antPath, R<LoginUserDTO> r) {
         // 1.判断是否是需要权限的路径
         String matchPath = findMatchPath(antPath);
-        if(matchPath == null){
+        if (matchPath == null) {
             // 没有权限限制，直接放行
             return;
         }
         // 2.判断是否登录成功
-        if(!r.success()){
+        if (!r.success()) {
             // 未登录，直接报错
             throw new UnauthorizedException(r.getCode(), r.getMsg());
         }
@@ -108,16 +106,16 @@ public class AuthUtil {
 
         // 4.权限判断
         Set<Long> requiredRoles = pathPrivilege.getRoles();
-        if (!CollectionUtil.contains(requiredRoles, r.getData().getRoleId())) {
+        if (!(requiredRoles != null && requiredRoles.contains(r.getData().getRoleId()))) {
             // 没有访问权限
             throw new ForbiddenException(FORBIDDEN);
         }
     }
 
-    private String findMatchPath(String antPath){
+    private String findMatchPath(String antPath) {
         String matchPath = null;
         for (String pathPattern : paths) {
-            if(antPathMatcher.match(pathPattern, antPath)){
+            if (antPathMatcher.match(pathPattern, antPath)) {
                 matchPath = pathPattern;
                 break;
             }
@@ -125,31 +123,30 @@ public class AuthUtil {
         return matchPath;
     }
 
-    private PrivilegeRoleDTO findPathPrivilege(String path){
+    private PrivilegeRoleDTO findPathPrivilege(String path) {
         return privileges.get(path);
     }
 
-    private List<PrivilegeRoleDTO> loadPrivileges(){
+    private List<PrivilegeRoleDTO> loadPrivileges() {
         List<String> values = hashOps.values();
-        if(CollUtil.isEmpty(values)){
+        if (CollectionUtils.isEmpty(values)) {
             return Collections.emptyList();
         }
         return values.stream()
-                .map(json -> JSONUtil.toBean(json, PrivilegeRoleDTO.class))
+                .map(json -> JsonUtils.toBean(json, PrivilegeRoleDTO.class))
                 .collect(Collectors.toList());
     }
 
     private int currentVersion() {
         String version = stringRedisTemplate.opsForValue().get(AUTH_PRIVILEGE_VERSION_KEY);
-        if(StrUtil.isEmpty(version)){
+        if (StringUtils.isEmpty(version)) {
             return 0;
         }
         return Integer.parseInt(version);
     }
 
-
     @Scheduled(fixedDelay = 20000)
-    public void refreshTask(){
+    public void refreshTask() {
         // 1.获取版本号
         int currentVersion = currentVersion();
         if (currentVersion == this.privilegeVersion) {
@@ -158,7 +155,7 @@ public class AuthUtil {
         }
         // 2.获取最新权限信息
         List<PrivilegeRoleDTO> privilegeRoleDTOS = loadPrivileges();
-        if(CollUtil.isEmpty(privilegeRoleDTOS)){
+        if (CollectionUtils.isEmpty(privilegeRoleDTOS)) {
             // 更新版本
             this.privilegeVersion = currentVersion;
             return;

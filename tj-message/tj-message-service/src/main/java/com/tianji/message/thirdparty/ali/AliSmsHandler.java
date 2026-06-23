@@ -6,11 +6,11 @@ import com.aliyun.sdk.service.dysmsapi20170525.models.SendSmsResponse;
 import com.aliyun.sdk.service.dysmsapi20170525.models.SendSmsResponseBody;
 import com.tianji.api.dto.sms.SmsInfoDTO;
 import com.tianji.common.utils.JsonUtils;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.message.domain.po.MessageTemplate;
 import com.tianji.message.thirdparty.ISmsHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.CompletableFuture;
@@ -26,7 +26,7 @@ public class AliSmsHandler implements ISmsHandler {
     public void send(SmsInfoDTO platformSmsInfoDTO, MessageTemplate template) {
         log.info("aliYun平台，准备发送短信：{}", platformSmsInfoDTO);
         // 1.准备请求参数
-        String phones = StringUtils.join(",", platformSmsInfoDTO.getPhones());
+        String phones = StringUtils.join(platformSmsInfoDTO.getPhones(), ",");
         SendSmsRequest request = SendSmsRequest.builder()
                 .phoneNumbers(phones)
                 .templateCode(template.getThirdTemplateCode())
@@ -40,9 +40,9 @@ public class AliSmsHandler implements ISmsHandler {
         responseFuture.thenAccept(response -> {
             SendSmsResponseBody body = response.getBody();
             String code = body.getCode();
-            if("OK".equals(code)){
+            if ("OK".equals(code)) {
                 log.debug("aliYun短信发送成功，手机号:{}", phones);
-            }else{
+            } else {
                 log.error("aliYun短信发送失败，code：{}， 原因：{}", code, body.getMessage());
             }
         });

@@ -1,7 +1,5 @@
 package com.tianji.auth.controller;
 
-
-import cn.hutool.core.collection.CollectionUtil;
 import com.tianji.auth.domain.dto.MenuDTO;
 import com.tianji.auth.domain.po.Menu;
 import com.tianji.auth.domain.vo.MenuOptionVO;
@@ -10,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
  * <p>
  * 权限表，包括菜单权限和访问路径权限 前端控制器
  * </p>
- *
  * @author 虎哥
  * @since 2022-06-16
  */
@@ -42,11 +40,11 @@ public class MenuController {
     @GetMapping("/parent/{pid}")
     @Operation(summary = "根据父菜单id查询子菜单")
     public List<MenuOptionVO> listMenusByParent(
-            @Parameter(name = "父菜单id", example = "0") @PathVariable("pid") Long pid){
+            @Parameter(name = "父菜单id", example = "0") @PathVariable("pid") Long pid) {
         // 1.根据父id查询
         List<Menu> list = menuService.lambdaQuery().eq(Menu::getParentId, pid).list();
         // 2.非空判断
-        if (CollectionUtil.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             return Collections.emptyList();
         }
         // 3.数据转换
@@ -54,7 +52,7 @@ public class MenuController {
     }
 
     @GetMapping("{id}")
-    @Operation(summary ="根据id查询菜单")
+    @Operation(summary = "根据id查询菜单")
     public MenuOptionVO getMenuById(@Parameter(name = "菜单id", example = "1") @PathVariable("id") Long id) {
         Menu menu = menuService.getById(id);
         if (menu == null) {
@@ -69,14 +67,14 @@ public class MenuController {
      */
     @GetMapping
     @Operation(summary = "查询菜单，按照多级菜单组成树结构")
-    public List<MenuOptionVO> listMenuTree(){
+    public List<MenuOptionVO> listMenuTree() {
         // 1.查询所有菜单
         List<Menu> menus = menuService.list();
         return convert2MenuDTOs(menus);
     }
 
     private List<MenuOptionVO> convert2MenuDTOs(List<Menu> menus) {
-        if (CollectionUtil.isEmpty(menus)) {
+        if (CollectionUtils.isEmpty(menus)) {
             return Collections.emptyList();
         }
         // 2.按照父菜单id分组
@@ -103,7 +101,7 @@ public class MenuController {
      */
     @GetMapping("me")
     @Operation(summary = "查询我的菜单，按照多级菜单组成树结构")
-    public List<MenuOptionVO> listMenuTreeByUser(){
+    public List<MenuOptionVO> listMenuTreeByUser() {
         // 1.查询所有菜单
         List<Menu> menus = menuService.listMenuByUser();
         return convert2MenuDTOs(menus);
@@ -111,7 +109,7 @@ public class MenuController {
 
     @PostMapping
     @Operation(summary = "新增菜单")
-    public void saveMenu(@RequestBody MenuDTO menuDTO){
+    public void saveMenu(@RequestBody MenuDTO menuDTO) {
         // 1.数据转换
         Menu menu = new Menu(menuDTO);
         // 2.保存
@@ -122,7 +120,7 @@ public class MenuController {
     @Operation(summary = "更新菜单")
     public void updateMenu(
             @RequestBody MenuDTO menuDTO,
-            @Parameter(name = "菜单id", example = "1")@PathVariable("id") Long id) {
+            @Parameter(name = "菜单id", example = "1") @PathVariable("id") Long id) {
         menuDTO.setId(id);
         menuService.updateById(new Menu(menuDTO));
     }
@@ -138,7 +136,7 @@ public class MenuController {
     @Operation(summary = "绑定角色与菜单权限")
     public void bindRoleMenus(
             @Parameter(name = "角色id", example = "1") @PathVariable("roleId") Long roleId,
-            @Parameter(name = "菜单id集合") List<Long> menuIds){
+            @Parameter(name = "菜单id集合") List<Long> menuIds) {
         menuService.bindRoleMenus(roleId, menuIds);
     }
 
@@ -146,7 +144,7 @@ public class MenuController {
     @Operation(summary = "解除角色的菜单权限")
     public void deleteRoleMenus(
             @Parameter(name = "角色id", example = "1") @PathVariable("roleId") Long roleId,
-            @Parameter(name = "菜单id集合") List<Long> menuIds){
+            @Parameter(name = "菜单id集合") List<Long> menuIds) {
         menuService.deleteRoleMenus(roleId, menuIds);
     }
 }

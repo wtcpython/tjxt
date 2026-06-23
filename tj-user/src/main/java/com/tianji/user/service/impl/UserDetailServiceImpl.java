@@ -4,11 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.common.enums.UserType;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.user.domain.po.UserDetail;
 import com.tianji.user.domain.query.UserPageQuery;
 import com.tianji.user.mapper.UserDetailMapper;
 import com.tianji.user.service.IUserDetailService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,7 +17,6 @@ import java.util.List;
  * <p>
  * 教师详情表 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-08-15
  */
@@ -44,9 +43,9 @@ public class UserDetailServiceImpl extends ServiceImpl<UserDetailMapper, UserDet
         String phone = query.getPhone();
         QueryWrapper<UserDetail> wrapper = new QueryWrapper<>();
         wrapper
-                .eq(type != null , "u.type", type)
+                .eq(type != null, "u.type", type)
                 .eq(status != null, "u.status", status)
-                .eq(StringUtils.isNotBlank(phone),"u.cell_phone", phone)
+                .eq(StringUtils.isNotBlank(phone), "u.cell_phone", phone)
                 .like(StringUtils.isNotBlank(name), "ud.name", name);
         // 3.查询
         p = getBaseMapper().queryByPage(p, wrapper);

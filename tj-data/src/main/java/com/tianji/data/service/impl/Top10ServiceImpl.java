@@ -8,7 +8,7 @@ import com.tianji.data.model.po.CourseInfo;
 import com.tianji.data.model.vo.Top10DataVO;
 import com.tianji.data.service.Top10Service;
 import com.tianji.data.utils.DataUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -23,10 +23,10 @@ import java.util.stream.Collectors;
  * @Version
  **/
 @Service
+@RequiredArgsConstructor
 public class Top10ServiceImpl implements Top10Service {
 
-    @Autowired
-    private StringRedisTemplate redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     public Top10DataVO getTop10Data() {
@@ -62,10 +62,9 @@ public class Top10ServiceImpl implements Top10Service {
         // 2.数据转化
         List<CourseInfo> courseInfoList = BeanUtils.copyList(top10DataSetDTO.getData(), CourseInfo.class);
 
-        //3.新增或重置数据
+        // 3.新增或重置数据
         redisTemplate.opsForValue().set(
                 key,
-                JsonUtils.toJsonStr(courseInfoList)
-        );
+                JsonUtils.toJsonStr(courseInfoList));
     }
 }

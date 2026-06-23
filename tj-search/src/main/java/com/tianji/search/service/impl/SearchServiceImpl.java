@@ -15,6 +15,9 @@ import com.tianji.search.domain.vo.CourseVO;
 import com.tianji.search.repository.CourseRepository;
 import com.tianji.search.service.IInterestsService;
 import com.tianji.search.service.ISearchService;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -28,7 +31,6 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -39,27 +41,18 @@ import java.util.stream.Collectors;
 import static com.tianji.search.repository.CourseRepository.PUBLISH_TIME;
 
 @Service
+@RequiredArgsConstructor
 public class SearchServiceImpl implements ISearchService {
 
-    @Autowired
-    private RestHighLevelClient restClient;
-
-    @Autowired
-    private IInterestsService interestsService;
-
-    @Autowired
-    private UserClient userClient;
-
-    @Autowired
-    private CategoryCache categoryCache;
-
-    @Autowired
-    private InterestsProperties interestsProperties;
+    private final RestHighLevelClient restClient;
+    private final IInterestsService interestsService;
+    private final UserClient userClient;
+    private final CategoryCache categoryCache;
+    private final InterestsProperties interestsProperties;
 
     @Override
     public List<CourseVO> queryCourseByCateId(Long cateLv2Id) {
-        return queryTopNByCategoryIdLv2sAndFree(
-                CollUtils.singletonList(cateLv2Id), null, PUBLISH_TIME, false, 10);
+        return queryTopNByCategoryIdLv2sAndFree(Collections.singletonList(cateLv2Id), null, PUBLISH_TIME, false, 10);
     }
 
     @Override
@@ -90,7 +83,7 @@ public class SearchServiceImpl implements ISearchService {
         } else {
             // 4.已登录，根据兴趣爱好查询
             List<Long> categoryIds = interestsService.queryMyInterestsIds();
-            if (CollUtils.isEmpty(categoryIds)) {
+            if (CollectionUtils.isEmpty(categoryIds)) {
                 // 4.1.没有兴趣爱好，直接查询报名人数最多的
                 courses = queryTopNByCategoryIdLv2sAndFree(
                         null, isFree, sortBy, false, interestsProperties.getTopNumber());
@@ -109,7 +102,7 @@ public class SearchServiceImpl implements ISearchService {
         SearchRequest request = new SearchRequest(CourseRepository.INDEX_NAME);
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         // 1.1.是否免费
-        if(isFree != null) {
+        if (isFree != null) {
             queryBuilder.filter(QueryBuilders.termQuery(CourseRepository.FREE, isFree));
         }
         // 1.2.分类id
@@ -120,7 +113,7 @@ public class SearchServiceImpl implements ISearchService {
                 queryBuilder.filter(QueryBuilders.termsQuery(CourseRepository.CATEGORY_ID_LV2, categoryIds));
             }
         }
-        if(isFree != null || categoryIds != null) {
+        if (isFree != null || categoryIds != null) {
             request.source().query(queryBuilder);
         }
         // 1.3.TopN
@@ -136,7 +129,7 @@ public class SearchServiceImpl implements ISearchService {
         SearchHits searchHits = response.getHits();
         SearchHit[] hits = searchHits.getHits();
         if (hits == null || hits.length == 0) {
-            return CollUtils.emptyList();
+            return Collections.emptyList();
         }
         List<CourseVO> courses = new ArrayList<>(hits.length);
         Set<Long> teacherIds = new HashSet<>(hits.length);
@@ -171,7 +164,7 @@ public class SearchServiceImpl implements ISearchService {
         PageDTO<Course> result = handleSearchResponse(response, query.getPageSize());
         // 3.处理VO
         List<Course> list = result.getList();
-        if (CollUtils.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             return PageDTO.empty(result.getTotal(), result.getPages());
         }
         // 3.1.查询教师信息
@@ -197,7 +190,7 @@ public class SearchServiceImpl implements ISearchService {
         // 2.构建DSL
         request.source()
                 .query(QueryBuilders.matchPhraseQuery(CourseRepository.DEFAULT_QUERY_NAME, keyword))
-                .fetchSource(new String[]{"id"}, null);
+                .fetchSource(new String[] { "id" }, null);
         // 3.查询
         SearchResponse response;
         try {
@@ -210,7 +203,7 @@ public class SearchServiceImpl implements ISearchService {
         // 4.1.获取hits
         SearchHit[] hits = searchHits.getHits();
         if (hits.length == 0) {
-            return CollUtils.emptyList();
+            return Collections.emptyList();
         }
         // 4.2.获取id
         return Arrays.stream(hits)
@@ -218,7 +211,6 @@ public class SearchServiceImpl implements ISearchService {
                 .map(Long::valueOf)
                 .collect(Collectors.toList());
     }
-
 
     private SearchResponse searchForResponse(CoursePageQuery query, String[] excludeFields) {
         // 1.创建Request
@@ -275,7 +267,7 @@ public class SearchServiceImpl implements ISearchService {
         }
         LocalDateTime beginTime = query.getBeginTime();
         LocalDateTime endTime = query.getEndTime();
-        if(beginTime != null || endTime != null) {
+        if (beginTime != null || endTime != null) {
             RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(CourseRepository.UPDATE_TIME);
             if (beginTime != null) {
                 rangeQuery.gte(beginTime);
@@ -298,7 +290,7 @@ public class SearchServiceImpl implements ISearchService {
         // 3.获取命中的数据
         SearchHit[] hits = searchHits.getHits();
         if (hits.length <= 0) {
-            return new PageDTO<>(total, totalPages, CollUtils.emptyList());
+            return new PageDTO<>(total, totalPages, Collections.emptyList());
         }
         // 4.遍历
         List<Course> list = new ArrayList<>(hits.length);
@@ -309,11 +301,11 @@ public class SearchServiceImpl implements ISearchService {
             Course course = JsonUtils.toBean(jsonSource, Course.class);
             // 7.处理高亮
             Map<String, HighlightField> highlightFields = hit.getHighlightFields();
-            if (CollUtils.isNotEmpty(highlightFields)) {
+            if (MapUtils.isNotEmpty(highlightFields)) {
                 // 7.1.获取高亮结果
                 HighlightField field = highlightFields.get(CourseRepository.DEFAULT_QUERY_NAME);
                 Object[] fragments = field.getFragments();
-                String value = StringUtils.join(fragments);
+                String value = StringUtils.join(fragments, "");
                 // 7.2.覆盖非高亮结果
                 course.setName(value);
             }

@@ -1,10 +1,8 @@
 package com.tianji.media.service.impl;
 
-import cn.hutool.core.lang.UUID;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.common.exceptions.CommonException;
 import com.tianji.common.exceptions.DbException;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.media.config.PlatformProperties;
 import com.tianji.media.domain.dto.FileDTO;
 import com.tianji.media.domain.po.File;
@@ -15,17 +13,18 @@ import com.tianji.media.service.IFileService;
 import com.tianji.media.storage.IFileStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 /**
  * <p>
  * 文件表，可以是普通文件、图片等 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-06-30
  */
@@ -88,8 +87,8 @@ public class FileServiceImpl extends ServiceImpl<FileMapper, File> implements IF
 
     private String generateNewFileName(String originalFilename) {
         // 1.获取后缀
-        String suffix = StringUtils.subAfter(originalFilename, ".", true);
+        String suffix = StringUtils.substringAfterLast(originalFilename, ".");
         // 2.生成新文件名
-        return UUID.randomUUID().toString(true) + "." + suffix;
+        return UUID.randomUUID().toString().replace("-", "") + "." + suffix;
     }
 }

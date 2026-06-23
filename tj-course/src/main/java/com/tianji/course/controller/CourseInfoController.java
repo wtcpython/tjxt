@@ -1,7 +1,6 @@
 package com.tianji.course.controller;
 
 import com.tianji.api.dto.course.*;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.course.service.ICategoryService;
 import com.tianji.course.service.ICourseCatalogueService;
 import com.tianji.course.service.ICourseService;
@@ -10,6 +9,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,7 +38,7 @@ public class CourseInfoController {
     @GetMapping("infoByTeacherIds")
     @Operation(summary = "通过老师id获取老师负责的课程和出的题目数量")
     public List<SubNumAndCourseNumDTO> infoByTeacherIds(@RequestParam("teacherIds") List<Long> teacherIds) {
-        if (CollUtils.isEmpty(teacherIds)) {
+        if (CollectionUtils.isEmpty(teacherIds)) {
             return new ArrayList<>();
         }
         return courseService.countSubjectNumAndCourseNumOfTeacher(teacherIds);
@@ -46,7 +46,6 @@ public class CourseInfoController {
 
     /**
      * 根据小节id获取小节对应的mediaId和课程id
-     *
      * @param sectionId 小节id
      * @return 小节对应的mediaId和课程id
      */
@@ -59,7 +58,6 @@ public class CourseInfoController {
 
     /**
      * 根据媒资Id列表查询媒资被引用的次数
-     *
      * @param mediaIds 媒资id列表
      * @return 媒资id和媒资被引用的次数的列表
      */

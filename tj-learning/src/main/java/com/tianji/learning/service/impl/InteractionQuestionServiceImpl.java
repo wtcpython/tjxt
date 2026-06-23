@@ -15,8 +15,6 @@ import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.CollUtils;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.learning.domain.dto.QuestionFormDTO;
 import com.tianji.learning.domain.po.InteractionQuestion;
@@ -28,8 +26,9 @@ import com.tianji.learning.domain.vo.QuestionVO;
 import com.tianji.learning.mapper.InteractionQuestionMapper;
 import com.tianji.learning.mapper.InteractionReplyMapper;
 import com.tianji.learning.service.IInteractionQuestionService;
-import com.tianji.learning.service.IInteractionReplyService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,12 +40,12 @@ import java.util.stream.Collectors;
  * <p>
  * 互动提问的问题表 服务实现类
  * </p>
- *
  * @author 虎哥
  */
 @Service
 @RequiredArgsConstructor
-public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuestionMapper, InteractionQuestion> implements IInteractionQuestionService {
+public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuestionMapper, InteractionQuestion>
+        implements IInteractionQuestionService {
 
     private final InteractionReplyMapper replyMapper;
     private final UserClient userClient;
@@ -84,7 +83,7 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
                 .eq(InteractionQuestion::getHidden, false)
                 .page(query.toMpPageDefaultSortByCreateTimeDesc());
         List<InteractionQuestion> records = page.getRecords();
-        if (CollUtils.isEmpty(records)) {
+        if (CollectionUtils.isEmpty(records)) {
             return PageDTO.empty(page);
         }
         // 3.根据id查询提问者和最近一次回答的信息
@@ -92,7 +91,7 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
         Set<Long> answerIds = new HashSet<>();
         // 3.1.得到问题当中的提问者id和最近一次回答的id
         for (InteractionQuestion q : records) {
-            if(!q.getAnonymity()) { // 只查询非匿名的问题
+            if (!q.getAnonymity()) { // 只查询非匿名的问题
                 userIds.add(q.getUserId());
             }
             answerIds.add(q.getLatestAnswerId());
@@ -100,11 +99,11 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
         // 3.2.根据id查询最近一次回答
         answerIds.remove(null);
         Map<Long, InteractionReply> replyMap = new HashMap<>(answerIds.size());
-        if(CollUtils.isNotEmpty(answerIds)) {
+        if (CollectionUtils.isNotEmpty(answerIds)) {
             List<InteractionReply> replies = replyMapper.selectBatchIds(answerIds);
             for (InteractionReply reply : replies) {
                 replyMap.put(reply.getId(), reply);
-                if(!reply.getAnonymity()){
+                if (!reply.getAnonymity()) {
                     userIds.add(reply.getUserId());
                 }
             }
@@ -113,7 +112,7 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
         // 3.3.根据id查询用户信息（提问者）
         userIds.remove(null);
         Map<Long, UserDTO> userMap = new HashMap<>(userIds.size());
-        if(CollUtils.isNotEmpty(userIds)) {
+        if (CollectionUtils.isNotEmpty(userIds)) {
             List<UserDTO> users = userClient.queryUserByIds(userIds);
             userMap = users.stream()
                     .collect(Collectors.toMap(UserDTO::getId, u -> u));
@@ -126,7 +125,7 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
             QuestionVO vo = BeanUtils.copyBean(r, QuestionVO.class);
             voList.add(vo);
             // 4.2.封装提问者信息
-            if(!r.getAnonymity()){
+            if (!r.getAnonymity()) {
                 UserDTO userDTO = userMap.get(r.getUserId());
                 if (userDTO != null) {
                     vo.setUserName(userDTO.getName());
@@ -138,7 +137,7 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
             InteractionReply reply = replyMap.get(r.getLatestAnswerId());
             if (reply != null) {
                 vo.setLatestReplyContent(reply.getContent());
-                if(!reply.getAnonymity()){
+                if (!reply.getAnonymity()) {
                     UserDTO user = userMap.get(reply.getUserId());
                     vo.setLatestReplyUser(user.getName());
                 }
@@ -154,13 +153,13 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
         // 1.根据id查询数据
         InteractionQuestion question = getById(id);
         // 2.数据校验
-        if(question == null || question.getHidden()){
+        if (question == null || question.getHidden()) {
             // 没有数据或者是被隐藏了
             return null;
         }
         // 3.查询提问者信息
         UserDTO user = null;
-        if(!question.getAnonymity()){
+        if (!question.getAnonymity()) {
             user = userClient.queryUserById(question.getUserId());
         }
         // 4.封装VO
@@ -178,7 +177,7 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
         List<Long> courseIds = null;
         if (StringUtils.isNotBlank(query.getCourseName())) {
             courseIds = searchClient.queryCoursesIdByName(query.getCourseName());
-            if (CollUtils.isEmpty(courseIds)) {
+            if (CollectionUtils.isEmpty(courseIds)) {
                 return PageDTO.empty(0L, 0L);
             }
         }
@@ -193,7 +192,7 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
                 .lt(end != null, InteractionQuestion::getCreateTime, end)
                 .page(query.toMpPageDefaultSortByCreateTimeDesc());
         List<InteractionQuestion> records = page.getRecords();
-        if (CollUtils.isEmpty(records)) {
+        if (CollectionUtils.isEmpty(records)) {
             return PageDTO.empty(page);
         }
 
@@ -211,25 +210,24 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
         // 3.2.根据id查询用户
         List<UserDTO> users = userClient.queryUserByIds(userIds);
         Map<Long, UserDTO> userMap = new HashMap<>(users.size());
-        if (CollUtils.isNotEmpty(users)) {
+        if (CollectionUtils.isNotEmpty(users)) {
             userMap = users.stream().collect(Collectors.toMap(UserDTO::getId, u -> u));
         }
 
         // 3.3.根据id查询课程
         List<CourseSimpleInfoDTO> cInfos = courseClient.getSimpleInfoList(cIds);
         Map<Long, CourseSimpleInfoDTO> cInfoMap = new HashMap<>(cInfos.size());
-        if (CollUtils.isNotEmpty(cInfos)) {
+        if (CollectionUtils.isNotEmpty(cInfos)) {
             cInfoMap = cInfos.stream().collect(Collectors.toMap(CourseSimpleInfoDTO::getId, c -> c));
         }
 
         // 3.4.根据id查询章节
         List<CataSimpleInfoDTO> catas = catalogueClient.batchQueryCatalogue(cataIds);
         Map<Long, String> cataMap = new HashMap<>(catas.size());
-        if (CollUtils.isNotEmpty(catas)) {
+        if (CollectionUtils.isNotEmpty(catas)) {
             cataMap = catas.stream()
                     .collect(Collectors.toMap(CataSimpleInfoDTO::getId, CataSimpleInfoDTO::getName));
         }
-
 
         // 4.封装VO
         List<QuestionAdminVO> voList = new ArrayList<>(records.size());
@@ -281,7 +279,7 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
             // 4.3.教师信息
             List<Long> teacherIds = cInfo.getTeacherIds();
             List<UserDTO> teachers = userClient.queryUserByIds(teacherIds);
-            if(CollUtils.isNotEmpty(teachers)) {
+            if (CollectionUtils.isNotEmpty(teachers)) {
                 vo.setTeacherName(teachers.stream()
                         .map(UserDTO::getName).collect(Collectors.joining("/")));
             }
@@ -290,7 +288,7 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
         List<CataSimpleInfoDTO> catas = catalogueClient.batchQueryCatalogue(
                 List.of(question.getChapterId(), question.getSectionId()));
         Map<Long, String> cataMap = new HashMap<>(catas.size());
-        if (CollUtils.isNotEmpty(catas)) {
+        if (CollectionUtils.isNotEmpty(catas)) {
             cataMap = catas.stream()
                     .collect(Collectors.toMap(CataSimpleInfoDTO::getId, CataSimpleInfoDTO::getName));
         }
@@ -348,7 +346,6 @@ public class InteractionQuestionServiceImpl extends ServiceImpl<InteractionQuest
         removeById(id);
         // 5.删除答案
         replyMapper.delete(
-                new QueryWrapper<InteractionReply>().lambda().eq(InteractionReply::getQuestionId, id)
-        );
+                new QueryWrapper<InteractionReply>().lambda().eq(InteractionReply::getQuestionId, id));
     }
 }

@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.user.UserDTO;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.DateUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.learning.constants.RedisConstants;
@@ -16,6 +15,7 @@ import com.tianji.learning.mapper.PointsBoardMapper;
 import com.tianji.learning.service.IPointsBoardService;
 import com.tianji.learning.utils.TableInfoContext;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.redis.core.BoundZSetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -31,7 +31,6 @@ import static com.tianji.learning.constants.LearningConstants.POINTS_BOARD_TABLE
  * <p>
  * 学霸天梯榜 服务实现类
  * </p>
- *
  * @author 虎哥
  */
 @Service
@@ -51,13 +50,11 @@ public class PointsBoardServiceImpl extends ServiceImpl<PointsBoardMapper, Point
         LocalDateTime now = LocalDateTime.now();
         String key = RedisConstants.POINTS_BOARD_KEY_PREFIX + now.format(DateUtils.POINTS_BOARD_SUFFIX_FORMATTER);
         // 2.查询我的积分和排名
-        PointsBoard myBoard = isCurrent ?
-                queryMyCurrentBoard(key) : // 查询当前榜单（Redis）
+        PointsBoard myBoard = isCurrent ? queryMyCurrentBoard(key) : // 查询当前榜单（Redis）
                 queryMyHistoryBoard(season); // 查询历史榜单（MySQL）
         // 3.查询榜单列表
-        List<PointsBoard> list = isCurrent ?
-                queryCurrentBoardList(key, query.getPageNo(), query.getPageSize()) :
-                queryHistoryBoardList(query);
+        List<PointsBoard> list = isCurrent ? queryCurrentBoardList(key, query.getPageNo(), query.getPageSize())
+                : queryHistoryBoardList(query);
         // 4.封装VO
         PointsBoardVO vo = new PointsBoardVO();
         // 4.1.处理我的信息
@@ -65,14 +62,14 @@ public class PointsBoardServiceImpl extends ServiceImpl<PointsBoardMapper, Point
             vo.setPoints(myBoard.getPoints());
             vo.setRank(myBoard.getRank());
         }
-        if (CollUtils.isEmpty(list)) {
+        if (CollectionUtils.isEmpty(list)) {
             return vo;
         }
         // 4.2.查询用户信息
         Set<Long> uIds = list.stream().map(PointsBoard::getUserId).collect(Collectors.toSet());
         List<UserDTO> users = userClient.queryUserByIds(uIds);
         Map<Long, String> userMap = new HashMap<>(uIds.size());
-        if(CollUtils.isNotEmpty(users)) {
+        if (CollectionUtils.isNotEmpty(users)) {
             userMap = users.stream().collect(Collectors.toMap(UserDTO::getId, UserDTO::getName));
         }
         // 4.3.转换VO
@@ -100,8 +97,8 @@ public class PointsBoardServiceImpl extends ServiceImpl<PointsBoardMapper, Point
         Page<PointsBoard> page = page(query.toMpPage());
         // 3.数据处理
         List<PointsBoard> records = page.getRecords();
-        if (CollUtils.isEmpty(records)) {
-            return CollUtils.emptyList();
+        if (CollectionUtils.isEmpty(records)) {
+            return Collections.emptyList();
         }
         records.forEach(b -> b.setRank(b.getId().intValue()));
         return records;
@@ -114,8 +111,8 @@ public class PointsBoardServiceImpl extends ServiceImpl<PointsBoardMapper, Point
         // 2.查询
         Set<ZSetOperations.TypedTuple<String>> tuples = redisTemplate.opsForZSet()
                 .reverseRangeWithScores(key, from, from + pageSize - 1);
-        if (CollUtils.isEmpty(tuples)) {
-            return CollUtils.emptyList();
+        if (CollectionUtils.isEmpty(tuples)) {
+            return Collections.emptyList();
         }
         // 3.封装
         int rank = from + 1;

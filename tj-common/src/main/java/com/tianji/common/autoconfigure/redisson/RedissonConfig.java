@@ -1,9 +1,9 @@
 package com.tianji.common.autoconfigure.redisson;
 
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.StrUtil;
 import com.tianji.common.autoconfigure.redisson.aspect.LockAspect;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@ConditionalOnClass({RedissonClient.class, Redisson.class})
+@ConditionalOnClass({ RedissonClient.class, Redisson.class })
 @Configuration
 @EnableConfigurationProperties(RedisProperties.class)
 public class RedissonConfig {
@@ -28,13 +28,13 @@ public class RedissonConfig {
 
     @Bean
     // @ConditionalOnMissingBean
-    public LockAspect lockAspect(RedissonClient redissonClient){
+    public LockAspect lockAspect(RedissonClient redissonClient) {
         return new LockAspect(redissonClient);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public RedissonClient redissonClient(RedisProperties properties){
+    public RedissonClient redissonClient(RedisProperties properties) {
         log.debug("尝试初始化RedissonClient");
         // 1.读取Redis配置
         RedisProperties.Cluster cluster = properties.getCluster();
@@ -42,18 +42,18 @@ public class RedissonConfig {
         String password = properties.getPassword();
         int timeout = 3000;
         Duration d = properties.getTimeout();
-        if(d != null){
+        if (d != null) {
             timeout = Long.valueOf(d.toMillis()).intValue();
         }
         // 2.设置Redisson配置
         Config config = new Config();
-        if(cluster != null && !CollectionUtil.isEmpty(cluster.getNodes())){
+        if (cluster != null && !CollectionUtils.isEmpty(cluster.getNodes())) {
             // 集群模式
             config.useClusterServers()
                     .addNodeAddress(convert(cluster.getNodes()))
                     .setConnectTimeout(timeout)
                     .setPassword(password);
-        }else if(sentinel != null && !StrUtil.isEmpty(sentinel.getMaster())){
+        } else if (sentinel != null && !StringUtils.isEmpty(sentinel.getMaster())) {
             // 哨兵模式
             config.useSentinelServers()
                     .setMasterName(sentinel.getMaster())
@@ -61,7 +61,7 @@ public class RedissonConfig {
                     .setConnectTimeout(timeout)
                     .setDatabase(0)
                     .setPassword(password);
-        }else{
+        } else {
             // 单机模式
             config.useSingleServer()
                     .setAddress(String.format("redis://%s:%d", properties.getHost(), properties.getPort()))

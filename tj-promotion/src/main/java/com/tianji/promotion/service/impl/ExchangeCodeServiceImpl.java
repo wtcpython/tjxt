@@ -3,7 +3,6 @@ package com.tianji.promotion.service.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.common.domain.dto.PageDTO;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.promotion.domain.po.Coupon;
 import com.tianji.promotion.domain.po.ExchangeCode;
 import com.tianji.promotion.domain.query.CodeQuery;
@@ -11,6 +10,7 @@ import com.tianji.promotion.domain.vo.ExchangeCodeVO;
 import com.tianji.promotion.mapper.ExchangeCodeMapper;
 import com.tianji.promotion.service.IExchangeCodeService;
 import com.tianji.promotion.utils.CodeUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.redis.core.BoundValueOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -26,11 +26,11 @@ import static com.tianji.promotion.constants.PromotionConstants.*;
  * <p>
  * 兑换码 服务实现类
  * </p>
- *
  * @author 虎哥
  */
 @Service
-public class ExchangeCodeServiceImpl extends ServiceImpl<ExchangeCodeMapper, ExchangeCode> implements IExchangeCodeService {
+public class ExchangeCodeServiceImpl extends ServiceImpl<ExchangeCodeMapper, ExchangeCode>
+        implements IExchangeCodeService {
 
     private final StringRedisTemplate redisTemplate;
     private final BoundValueOperations<String, String> serialOps;
@@ -91,7 +91,7 @@ public class ExchangeCodeServiceImpl extends ServiceImpl<ExchangeCodeMapper, Exc
         // 1.查询score值比当前序列号大的第一个优惠券
         Set<String> results = redisTemplate.opsForZSet().rangeByScore(
                 COUPON_RANGE_KEY, serialNum, serialNum + 5000, 0L, 1L);
-        if (CollUtils.isEmpty(results)) {
+        if (CollectionUtils.isEmpty(results)) {
             return null;
         }
         // 2.数据转换

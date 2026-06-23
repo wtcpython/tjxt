@@ -6,9 +6,7 @@ import com.tianji.api.client.user.UserClient;
 import com.tianji.api.dto.user.UserDTO;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.MarkedRunnable;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.message.constants.MessageErrorInfo;
 import com.tianji.message.domain.dto.NoticeTaskDTO;
 import com.tianji.message.domain.dto.NoticeTaskFormDTO;
@@ -20,6 +18,8 @@ import com.tianji.message.mapper.NoticeTaskMapper;
 import com.tianji.message.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +31,6 @@ import java.util.concurrent.Executor;
  * <p>
  * 系统通告的任务表，可以延期或定期发送通告 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-08-19
  */
@@ -55,7 +54,7 @@ public class NoticeTaskServiceImpl extends ServiceImpl<NoticeTaskMapper, NoticeT
         Long taskId = noticeTask.getId();
         // 2.判断是否有执行时间
         LocalDateTime pushTime = noticeTask.getPushTime();
-        if(pushTime == null || pushTime.isBefore(LocalDateTime.now())){
+        if (pushTime == null || pushTime.isBefore(LocalDateTime.now())) {
             // 没有执行时间，或者执行时间小于当前时间，立刻执行任务
             asyncNoticeExecutor.execute(new MarkedRunnable(() -> handleTask(noticeTask)));
         }
@@ -68,12 +67,12 @@ public class NoticeTaskServiceImpl extends ServiceImpl<NoticeTaskMapper, NoticeT
         // 1.获取任务要发送的通知模板
         Long templateId = task.getTemplateId();
         NoticeTemplate noticeTemplate = noticeTemplateService.getById(templateId);
-        if(noticeTemplate == null){
+        if (noticeTemplate == null) {
             // 模板不存在或者无法使用
             log.error("通知任务无法执行，模板id【{}】，原因：{}", templateId, MessageErrorInfo.NOTICE_TEMPLATE_NOT_EXISTS);
             return;
         }
-        if(noticeTemplate.getStatus() != TemplateStatus.IN_SERVICE.getValue()){
+        if (noticeTemplate.getStatus() != TemplateStatus.IN_SERVICE.getValue()) {
             // 模板不存在或者无法使用
             log.error("通知任务无法执行，模板id【{}】，原因：{}", templateId, MessageErrorInfo.NOTICE_TEMPLATE_CANNOT_USE);
             return;
@@ -83,20 +82,20 @@ public class NoticeTaskServiceImpl extends ServiceImpl<NoticeTaskMapper, NoticeT
         if (task.getPartial()) {
             // 针对部分用户，需要查询用户信息
             List<Long> userIds = getBaseMapper().queryTaskTargetByTaskId(task.getId());
-            if(CollUtils.isNotEmpty(userIds)){
+            if (CollectionUtils.isNotEmpty(userIds)) {
                 users = userClient.queryUserByIds(userIds);
             }
         }
 
         // 3.判断是全部用户还是部分
-        if (CollUtils.isEmpty(users)) {
+        if (CollectionUtils.isEmpty(users)) {
             // 3.1.全部用户，直接存入公告箱，用户查看消息时才拉取(pull mode)
             publicNoticeService.saveNoticeOfTemplate(noticeTemplate);
-        }else{
+        } else {
             // 3.2.部分用户，需要写入用户信箱
             inboxService.saveNoticeToInbox(noticeTemplate, users);
             // 3.3.判断是否需要发短信通知
-            if(noticeTemplate.getIsSmsTemplate()){
+            if (noticeTemplate.getIsSmsTemplate()) {
                 // 需要发送短信通知
                 smsService.sendMessageByTemplate(noticeTemplate, users);
             }

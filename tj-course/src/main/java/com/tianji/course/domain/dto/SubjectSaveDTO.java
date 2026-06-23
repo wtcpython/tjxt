@@ -2,16 +2,16 @@ package com.tianji.course.domain.dto;
 
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.BizIllegalException;
-import com.tianji.common.utils.CollUtils;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.common.validate.Checker;
 import com.tianji.common.validate.annotations.EnumValid;
 import com.tianji.course.constants.SubjectConstants;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -35,12 +35,12 @@ public class SubjectSaveDTO implements Checker {
 
     @Schema(description = "题目类型", example = "1")
     @NotNull(message = "题目类型为空，请设置题目类型")
-    @EnumValid(enumeration = {1, 2, 3, 4, 5}, message = "题目类型只有单选题，多选题，不定向选择题，判断题，您的题目超出题纲")
+    @EnumValid(enumeration = { 1, 2, 3, 4, 5 }, message = "题目类型只有单选题，多选题，不定向选择题，判断题，您的题目超出题纲")
     private Integer subjectType;
 
     @Schema(description = "题目难易度", example = "1")
     @NotNull(message = "难度不能为空")
-    @EnumValid(enumeration = {1, 2, 3}, message = "题目难度只有简单，中等，困难")
+    @EnumValid(enumeration = { 1, 2, 3 }, message = "题目难度只有简单，中等，困难")
     private Integer difficulty;
 
     @Schema(description = "分值", example = "5")
@@ -67,7 +67,7 @@ public class SubjectSaveDTO implements Checker {
                 Objects.equals(subjectType, SubjectConstants.Type.NON_DIRECTIONAL_CHOICE.getType())) {
             Integer answerOptionMax = answers.stream().max(Integer::compare).orElse(0);
             // 选项最少1个最多10个
-            if (CollUtils.isEmpty(options) || options.size() > 10) {
+            if (CollectionUtils.isEmpty(options) || options.size() > 10) {
                 throw new BizIllegalException("最少1个选项，最多10个选项");
             }
             // 选择题答案 不能超过选项数

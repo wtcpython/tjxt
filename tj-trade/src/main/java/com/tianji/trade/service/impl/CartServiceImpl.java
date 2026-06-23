@@ -9,8 +9,6 @@ import com.tianji.api.dto.course.CourseSimpleInfoDTO;
 import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.CollUtils;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.trade.config.TradeProperties;
 import com.tianji.trade.domain.po.Cart;
@@ -19,10 +17,13 @@ import com.tianji.trade.mapper.CartMapper;
 import com.tianji.trade.service.ICartService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,6 @@ import static com.tianji.trade.constants.TradeErrorInfo.*;
  * <p>
  * 购物车条目信息，也就是购物车中的课程 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-08-28
  */
@@ -72,8 +72,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         }
         // 5.写入购物车
         Cart cart = new Cart();
-        cart.setId(IdWorker.getId()); //购物车中的id
-        cart.setCourseId(courseId); //课程id
+        cart.setId(IdWorker.getId()); // 购物车中的id
+        cart.setCourseId(courseId); // 课程id
         cart.setCourseName(courseInfo.getName());
         cart.setUserId(UserContext.getUser());
         cart.setCoverUrl(courseInfo.getCoverUrl());
@@ -85,8 +85,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
     private void checkCartsFull(Long userId) {
         Long count = lambdaQuery().eq(Cart::getUserId, userId).count();
         if (count >= tradeProperties.getMaxCourseAmount()) {
-            throw new BizIllegalException(
-                    StringUtils.format(CARTS_FULL, tradeProperties.getMaxCourseAmount()));
+            throw new BizIllegalException(String.format(CARTS_FULL, tradeProperties.getMaxCourseAmount()));
         }
     }
 
@@ -104,8 +103,8 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         Long userId = UserContext.getUser();
         // 2.查询我的购物车
         List<Cart> carts = lambdaQuery().eq(Cart::getUserId, userId).list();
-        if (CollUtils.isEmpty(carts)) {
-            return CollUtils.emptyList();
+        if (CollectionUtils.isEmpty(carts)) {
+            return Collections.emptyList();
         }
         // 3.查询购物车中的课程
         List<Long> courseIds = carts.stream().map(Cart::getCourseId).collect(Collectors.toList());
@@ -138,8 +137,7 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         // 2.删除
         remove(new LambdaQueryWrapper<Cart>()
                 .eq(Cart::getId, id)
-                .eq(Cart::getUserId, userId)
-        );
+                .eq(Cart::getUserId, userId));
     }
 
     @Override
@@ -147,21 +145,19 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements IC
         Long userId = UserContext.getUser();
         remove(new LambdaQueryWrapper<Cart>()
                 .eq(Cart::getUserId, userId)
-                .in(Cart::getId, ids)
-        );
+                .in(Cart::getId, ids));
     }
 
     @Override
     public void deleteCartByUserAndCourseIds(Long userId, List<Long> courseIds) {
         log.debug("尝试从购物车删除用户已购买的课程，用户id：{}，课程id：{}", userId, courseIds);
         try {
-            if(CollUtils.isEmpty(courseIds) || userId == null){
+            if (CollectionUtils.isEmpty(courseIds) || userId == null) {
                 return;
             }
             remove(new LambdaQueryWrapper<Cart>()
                     .eq(Cart::getUserId, userId)
-                    .in(Cart::getCourseId, courseIds)
-            );
+                    .in(Cart::getCourseId, courseIds));
         } catch (Exception e) {
             log.error("从购物车删除用户已购买的课程发生异常，用户id：{}，课程id：{}", userId, courseIds, e);
         }

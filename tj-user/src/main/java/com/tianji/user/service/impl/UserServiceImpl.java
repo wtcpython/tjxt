@@ -1,7 +1,5 @@
 package com.tianji.user.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tianji.api.client.auth.AuthClient;
 import com.tianji.api.dto.auth.RoleDTO;
@@ -13,7 +11,7 @@ import com.tianji.common.exceptions.BadRequestException;
 import com.tianji.common.exceptions.ForbiddenException;
 import com.tianji.common.exceptions.UnauthorizedException;
 import com.tianji.common.utils.AssertUtils;
-import com.tianji.common.utils.StringUtils;
+import com.tianji.common.utils.BeanUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.user.domain.dto.UserFormDTO;
 import com.tianji.user.domain.po.User;
@@ -24,7 +22,8 @@ import com.tianji.user.mapper.UserMapper;
 import com.tianji.user.service.ICodeService;
 import com.tianji.user.service.IUserDetailService;
 import com.tianji.user.service.IUserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,26 +31,21 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.tianji.user.constants.UserConstants.*;
 import static com.tianji.user.constants.UserErrorInfo.Msg.*;
 
-
 /**
  * <p>
  * 学员用户表 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-06-28
  */
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private ICodeService codeService;
-    @Autowired
-    private AuthClient authClient;
-    @Autowired
-    private IUserDetailService detailService;
+    private final PasswordEncoder passwordEncoder;
+    private final ICodeService codeService;
+    private final AuthClient authClient;
+    private final IUserDetailService detailService;
 
     @Override
     public LoginUserDTO queryUserDetail(LoginFormDTO loginDTO, boolean isStaff) {
@@ -102,7 +96,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 3.封装vo
         UserType type = userDetail.getType();
         // 3.1.基本信息
-        UserDetailVO vo = BeanUtil.toBean(userDetail, UserDetailVO.class);
+        UserDetailVO vo = BeanUtils.toBean(userDetail, UserDetailVO.class);
         // 3.2.详情信息
         switch (type) {
             case STAFF:
@@ -179,12 +173,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setType(type);
         save(user);
         // 2.新增详情
-        UserDetail detail = BeanUtil.toBean(userDTO, UserDetail.class);
+        UserDetail detail = BeanUtils.toBean(userDTO, UserDetail.class);
         detail.setId(user.getId());
         detail.setType(type);
-        if(type == UserType.TEACHER){
+        if (type == UserType.TEACHER) {
             detail.setRoleId(TEACHER_ROLE_ID);
-        }else{
+        } else {
             if (userDTO.getRoleId() == null) {
                 throw new BadRequestException("员工角色信息不能为空");
             }
@@ -198,7 +192,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public void updateUser(UserDTO userDTO) {
         // 1.如果传递了手机号，则修改手机号
         String cellphone = userDTO.getCellPhone();
-        if(StringUtils.isNotBlank(cellphone)){
+        if (StringUtils.isNotBlank(cellphone)) {
             User user = new User();
             user.setId(userDTO.getId());
             user.setCellPhone(cellphone);
@@ -206,7 +200,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             updateById(user);
         }
         // 2.修改详情
-        UserDetail detail = BeanUtil.toBean(userDTO, UserDetail.class);
+        UserDetail detail = BeanUtils.toBean(userDTO, UserDetail.class);
         detail.setType(null);
         detailService.updateById(detail);
     }
@@ -216,7 +210,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 1.尝试更新密码
         String pw = userDTO.getPassword();
         String oldPw = userDTO.getOldPassword();
-        if(StringUtils.isNotBlank(pw) && StringUtils.isNotBlank(pw)) {
+        if (StringUtils.isNotBlank(pw) && StringUtils.isNotBlank(pw)) {
             Long userId = UserContext.getUser();
             // 1.1.查询用户
             User user = getById(userId);
@@ -236,7 +230,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             updateById(user);
         }
         // 2.更新用户详情
-        UserDetail detail = BeanUtil.toBean(userDTO, UserDetail.class);
+        UserDetail detail = BeanUtils.toBean(userDTO, UserDetail.class);
         detail.setRoleId(null);
         detail.setType(null);
         detailService.updateById(detail);
@@ -246,13 +240,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         // 1.数据校验
         String username = loginDTO.getUsername();
         String cellPhone = loginDTO.getCellPhone();
-        if (StrUtil.isBlank(username) && StrUtil.isBlank(cellPhone)) {
+        if (StringUtils.isBlank(username) && StringUtils.isBlank(cellPhone)) {
             throw new BadRequestException(INVALID_UN);
         }
         // 2.根据用户名或手机号查询
         User user = lambdaQuery()
-                .eq(StrUtil.isNotBlank(username), User::getUsername, username)
-                .eq(StrUtil.isNotBlank(cellPhone), User::getCellPhone, cellPhone)
+                .eq(StringUtils.isNotBlank(username), User::getUsername, username)
+                .eq(StringUtils.isNotBlank(cellPhone), User::getCellPhone, cellPhone)
                 .one();
         AssertUtils.isNotNull(user, INVALID_UN_OR_PW);
         // 3.校验是否禁用

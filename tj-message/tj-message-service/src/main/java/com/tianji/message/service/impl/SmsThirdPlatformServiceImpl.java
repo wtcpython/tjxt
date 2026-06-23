@@ -3,16 +3,16 @@ package com.tianji.message.service.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.benmanes.caffeine.cache.Cache;
-import com.tianji.message.domain.dto.SmsThirdPlatformDTO;
-import com.tianji.message.domain.dto.SmsThirdPlatformFormDTO;
-import com.tianji.message.domain.query.SmsThirdPlatformPageQuery;
 import com.tianji.common.domain.dto.PageDTO;
 import com.tianji.common.utils.BeanUtils;
-import com.tianji.common.utils.StringUtils;
+import com.tianji.message.domain.dto.SmsThirdPlatformDTO;
+import com.tianji.message.domain.dto.SmsThirdPlatformFormDTO;
 import com.tianji.message.domain.po.SmsThirdPlatform;
+import com.tianji.message.domain.query.SmsThirdPlatformPageQuery;
 import com.tianji.message.mapper.SmsThirdPlatformMapper;
 import com.tianji.message.service.ISmsThirdPlatformService;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,18 +21,18 @@ import java.util.List;
  * <p>
  * 第三方云通讯平台 服务实现类
  * </p>
- *
  * @author 虎哥
  * @since 2022-08-19
  */
 @Service
-public class SmsThirdPlatformServiceImpl extends ServiceImpl<SmsThirdPlatformMapper, SmsThirdPlatform> implements ISmsThirdPlatformService {
+public class SmsThirdPlatformServiceImpl extends ServiceImpl<SmsThirdPlatformMapper, SmsThirdPlatform>
+        implements ISmsThirdPlatformService {
 
     @Resource
     private Cache<String, List<SmsThirdPlatform>> platformCache;
 
     @Override
-    public List<SmsThirdPlatform> queryAllPlatform(){
+    public List<SmsThirdPlatform> queryAllPlatform() {
         return platformCache.get("PLATFORM", key -> lambdaQuery().orderByAsc(SmsThirdPlatform::getPriority).list());
     }
 

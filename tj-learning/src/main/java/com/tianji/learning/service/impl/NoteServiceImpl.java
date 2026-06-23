@@ -30,6 +30,9 @@ import com.tianji.learning.domain.vo.NoteVO;
 import com.tianji.learning.mapper.NoteMapper;
 import com.tianji.learning.service.INoteService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +48,6 @@ import static com.tianji.common.constants.MqConstants.Key.WRITE_NOTE;
  * <p>
  * 服务实现类
  * </p>
- *
  * @author 虎哥
  */
 @Service
@@ -98,10 +100,9 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
     @Override
     public void removeGatherNote(Long id) {
         // 1.笔记删除条件
-        LambdaUpdateWrapper<Note> queryWrapper =
-                Wrappers.lambdaUpdate(Note.class)
-                        .eq(Note::getUserId, UserContext.getUser())
-                        .eq(Note::getGatheredNoteId, id);
+        LambdaUpdateWrapper<Note> queryWrapper = Wrappers.lambdaUpdate(Note.class)
+                .eq(Note::getUserId, UserContext.getUser())
+                .eq(Note::getGatheredNoteId, id);
         // 2.删除笔记
         baseMapper.delete(queryWrapper);
     }
@@ -141,15 +142,14 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
         // 3.获取用户
         Long userId = UserContext.getUser();
         // 4.搜索
-        Page<Note> page = query.getOnlyMine() ?
-                lambdaQuery()
-                        .eq(Note::getUserId, userId)
-                        .eq(Note::getHidden, false)
-                        .eq(courseId != null, Note::getCourseId, courseId)
-                        .eq(sectionId != null, Note::getSectionId, sectionId)
-                        .orderByAsc(sectionId != null, Note::getNoteMoment)
-                        .orderByDesc(sectionId == null, Note::getId)
-                        .page(p)
+        Page<Note> page = query.getOnlyMine() ? lambdaQuery()
+                .eq(Note::getUserId, userId)
+                .eq(Note::getHidden, false)
+                .eq(courseId != null, Note::getCourseId, courseId)
+                .eq(sectionId != null, Note::getSectionId, sectionId)
+                .orderByAsc(sectionId != null, Note::getNoteMoment)
+                .orderByDesc(sectionId == null, Note::getId)
+                .page(p)
                 : baseMapper.queryNotePageBySectionId(p, userId, courseId, sectionId);
         // 5.数据处理
         return parseNotePages(page);
@@ -161,11 +161,11 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
         Page<Note> notePage = new Page<>(query.getPageNo(), query.getPageSize());
         // 2.课程名称
         List<Long> courseIdList = null;
-        if(StringUtils.isNotEmpty(query.getName())){
+        if (StringUtils.isNotEmpty(query.getName())) {
             // 2.1.查询课程信息
             courseIdList = searchClient.queryCoursesIdByName(query.getName());
             // 2.2.判空
-            if(CollUtils.isEmpty(courseIdList)){
+            if (CollectionUtils.isEmpty(courseIdList)) {
                 return PageDTO.empty(notePage);
             }
 
@@ -182,14 +182,14 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
         LocalDateTime endTime = query.getEndTime();
         QueryWrapper<Note> wrapper = new QueryWrapper<>();
         wrapper.lambda()
-                .in(CollUtils.isNotEmpty(courseIdList), Note::getCourseId, courseIdList)
+                .in(CollectionUtils.isNotEmpty(courseIdList), Note::getCourseId, courseIdList)
                 .eq(query.getHidden() != null, Note::getHidden, query.getHidden())
                 .ge(beginTime != null, Note::getCreateTime, beginTime)
                 .le(endTime != null, Note::getCreateTime, endTime);
         // 5.查询
         Page<Note> page = baseMapper.queryNotePage(notePage, wrapper);
         List<Note> records = page.getRecords();
-        if (CollUtils.isEmpty(records)) {
+        if (CollectionUtils.isEmpty(records)) {
             return PageDTO.empty(page);
         }
         // 6.数据处理
@@ -203,25 +203,25 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
         Set<Long> uIds = new HashSet<>();
         for (Note r : records) {
             courseIds.add(r.getCourseId());
-            if (r.getChapterId() != null) csIds.add(r.getChapterId());
-            if (r.getSectionId() != null) csIds.add(r.getSectionId());
+            if (r.getChapterId() != null)
+                csIds.add(r.getChapterId());
+            if (r.getSectionId() != null)
+                csIds.add(r.getSectionId());
             uIds.add(r.getUserId());
         }
         // 6.1.获取课程信息
         List<CourseSimpleInfoDTO> courseInfos = courseClient.getSimpleInfoList(courseIds);
-        Map<Long, String> courseMap = CollUtils.isEmpty(courseInfos) ?
-                new HashMap<>() :
-                courseInfos.stream().collect(Collectors.toMap(CourseSimpleInfoDTO::getId, CourseSimpleInfoDTO::getName));
+        Map<Long, String> courseMap = CollectionUtils.isEmpty(courseInfos) ? new HashMap<>()
+                : courseInfos.stream()
+                        .collect(Collectors.toMap(CourseSimpleInfoDTO::getId, CourseSimpleInfoDTO::getName));
         // 6.2.获取章节信息
         List<CataSimpleInfoDTO> csInfos = catalogueClient.batchQueryCatalogue(csIds);
-        Map<Long, String> csNameMap = CollUtils.isEmpty(csInfos) ?
-                new HashMap<>() :
-                csInfos.stream().collect(Collectors.toMap(CataSimpleInfoDTO::getId, CataSimpleInfoDTO::getName));
+        Map<Long, String> csNameMap = CollectionUtils.isEmpty(csInfos) ? new HashMap<>()
+                : csInfos.stream().collect(Collectors.toMap(CataSimpleInfoDTO::getId, CataSimpleInfoDTO::getName));
         // 6.3.获取用户信息
         List<UserDTO> userInfos = userClient.queryUserByIds(uIds);
-        Map<Long, String> userMap = CollUtils.isEmpty(userInfos) ?
-                new HashMap<>() :
-                userInfos.stream().collect(Collectors.toMap(UserDTO::getId, UserDTO::getName));
+        Map<Long, String> userMap = CollectionUtils.isEmpty(userInfos) ? new HashMap<>()
+                : userInfos.stream().collect(Collectors.toMap(UserDTO::getId, UserDTO::getName));
         for (Note r : records) {
             NoteAdminVO v = BeanUtils.toBean(r, NoteAdminVO.class);
             v.setAuthorName(userMap.get(r.getUserId()));
@@ -241,8 +241,7 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
         // 2.转换VO
         NoteAdminDetailVO vo = BeanUtils.toBean(note, NoteAdminDetailVO.class);
         // 3.查询课程信息
-        CourseFullInfoDTO courseInfo =
-                courseClient.getCourseInfoById(note.getCourseId(), false, false);
+        CourseFullInfoDTO courseInfo = courseClient.getCourseInfoById(note.getCourseId(), false, false);
         if (courseInfo != null) {
             // 3.1.课程信息
             vo.setCourseName(courseInfo.getName());
@@ -314,22 +313,21 @@ public class NoteServiceImpl extends ServiceImpl<NoteMapper, Note> implements IN
     private PageDTO<NoteVO> parseNotePages(Page<Note> page) {
         // 1.非空判断
         List<Note> records = page.getRecords();
-        if (CollUtils.isEmpty(records)) {
+        if (CollectionUtils.isEmpty(records)) {
             return PageDTO.empty(page);
         }
         // 2.查询笔记作者
         Set<Long> userIds = records.stream().map(Note::getAuthorId).collect(Collectors.toSet());
         List<UserDTO> stuInfos = userClient.queryUserByIds(userIds);
-        Map<Long, UserDTO> sMap = CollUtils.isEmpty(stuInfos) ?
-                new HashMap<>() :
-                stuInfos.stream().collect(Collectors.toMap(UserDTO::getId, s -> s));
+        Map<Long, UserDTO> sMap = CollectionUtils.isEmpty(stuInfos) ? new HashMap<>()
+                : stuInfos.stream().collect(Collectors.toMap(UserDTO::getId, s -> s));
 
         // 3.处理VO
         List<NoteVO> list = new ArrayList<>(records.size());
         for (Note r : records) {
             NoteVO v = BeanUtils.toBean(r, NoteVO.class);
             UserDTO author = sMap.get(r.getAuthorId());
-            if(author != null) {
+            if (author != null) {
                 v.setAuthorId(author.getId());
                 v.setAuthorName(author.getName());
                 v.setAuthorIcon(author.getIcon());

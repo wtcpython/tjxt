@@ -7,7 +7,7 @@ package com.tianji.course.constants;
  **/
 public class CourseErrorInfo {
 
-    //错误信息
+    // 错误信息
     public class Msg {
         public static final String CATEGORY_PARENT_NOT_FOUND = "课程分类父分类没有找到";
         public static final String CATEGORY_CREATE_ON_THIRD = "三级分类下不能再创建子分类";
@@ -58,7 +58,7 @@ public class CourseErrorInfo {
         public static final String COURSE_CATAS_SAVE_NAME_SIZE2 = "小节名称格格式错误，请重新输入";
         public static final String COURSE_CATAS_SAVE_NAME_NULL2 = "小节名称为空，请输入小节名称";
         public static final String COURSE_CATAS_SAVE_CHAPTER_WITHOUT_SECTION = "章里必须有小节";
-        public static final String COURSE_CATAS_SAVE_CHAPTER_NAME_DELETED = "已经上架的{}目录被删除了";
+        public static final String COURSE_CATAS_SAVE_CHAPTER_NAME_DELETED = "已经上架的%s目录被删除了";
         public static final String COURSE_CATAS_SAVE_CHAPTER_NAME_MOVE = "已经上架的《%s》目录被移动了";
         public static final String COURSE_CATAS_SAVE_INEDX = "目录的章中有序号是重复的";
         public static final String COURSE_CATAS_SAVE_INEDX_JUMP = "目录的章中有序号不连续";
@@ -74,7 +74,8 @@ public class CourseErrorInfo {
         public static final String COURSE_SUBJECT_SAVE_CATALOGUE_ID_NULL = "题目未指定练习id";
         public static final String COURSE_TEACHER_SAVE_COURSE_ID_NULL = "课程id不能为空";
         public static final String COURSE_TEACHER_SAVE_TEACHERS_NULL = "请至少设置一名教师";
-//        public static final String COURSE_TEACHER_SAVE_TEACHERS_NUM_MAX = "最多可设置5名课程老师";
+        // public static final String COURSE_TEACHER_SAVE_TEACHERS_NUM_MAX =
+        // "最多可设置5名课程老师";
         public static final String COURSE_TEACHER_SAVE_TEACHERS_NUM_MAX = "必须设置老师1-到5人";
         public static final String COURSE_TEACHER_SAVE_TEACHER_SHOW = "老师用户端显示不能为空";
         public static final String COURSE_TEACHER_SAVE_TEACHER_ID_NULL = "老师id不能为空";
@@ -84,8 +85,8 @@ public class CourseErrorInfo {
         public static final String COURSE_UP_SHELF_INFO_INCOMPLETE = "课程信息未填写完，无法上架";
         public static final String COURSE_UP_SHELF_STATE_WRONG = "当前课程不能进行上架";
         public static final String COURSE_UP_SHELF_PURCHASE_ILLEGAL = "下架时间需晚于当前时间";
-        public static final String COURSE_UP_SHELF_SECTION_WITHOUT_MEDIA = "小节《{}》未上传媒资";
-        public static final String COURSE_UP_SHELF_PRACTICE_WITHOUT_SUBJECT = "练习《{}》未上传题目";
+        public static final String COURSE_UP_SHELF_SECTION_WITHOUT_MEDIA = "小节《%s》未上传媒资";
+        public static final String COURSE_UP_SHELF_PRACTICE_WITHOUT_SUBJECT = "练习《%s》未上传题目";
         public static final String COURSE_UP_SHELF_NOT_FOUND_COURSE = "未找到对应的课程";
         public static final String COURSE_UP_SHELF_AREADY = "课程已经上架，请勿重复操作";
         public static final String COURSE_DOWN_SHELF_FAILD = "当前课程不能下架";

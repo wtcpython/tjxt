@@ -3,7 +3,6 @@ package com.tianji.promotion.service.impl;
 import com.tianji.api.dto.promotion.CouponDiscountDTO;
 import com.tianji.api.dto.promotion.OrderCouponDTO;
 import com.tianji.api.dto.promotion.OrderCourseDTO;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.UserContext;
 import com.tianji.promotion.domain.po.Coupon;
 import com.tianji.promotion.domain.po.CouponScope;
@@ -16,6 +15,8 @@ import com.tianji.promotion.strategy.discount.DiscountStrategy;
 import com.tianji.promotion.utils.PermuteUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -40,8 +41,8 @@ public class DiscountServiceImpl implements IDiscountService {
     public List<CouponDiscountDTO> findDiscountSolution(List<OrderCourseDTO> orderCourses) {
         // 1.查询我的所有可用优惠券
         List<Coupon> coupons = userCouponMapper.queryMyCoupons(UserContext.getUser());
-        if (CollUtils.isEmpty(coupons)) {
-            return CollUtils.emptyList();
+        if (CollectionUtils.isEmpty(coupons)) {
+            return Collections.emptyList();
         }
         // 2.初筛
         // 2.1.计算订单总价
@@ -50,14 +51,14 @@ public class DiscountServiceImpl implements IDiscountService {
         List<Coupon> availableCoupons = coupons.stream()
                 .filter(c -> DiscountStrategy.getDiscount(c.getDiscountType()).canUse(totalAmount, c))
                 .collect(Collectors.toList());
-        if (CollUtils.isEmpty(availableCoupons)) {
-            return CollUtils.emptyList();
+        if (CollectionUtils.isEmpty(availableCoupons)) {
+            return Collections.emptyList();
         }
         // 3.排列组合出所有方案
         // 3.1.细筛（找出每一个优惠券的可用的课程，判断课程总价是否达到优惠券的使用需求）
         Map<Coupon, List<OrderCourseDTO>> availableCouponMap = findAvailableCoupon(availableCoupons, orderCourses);
-        if (CollUtils.isEmpty(availableCouponMap)) {
-            return CollUtils.emptyList();
+        if (MapUtils.isEmpty(availableCouponMap)) {
+            return Collections.emptyList();
         }
         // 3.2.排列组合
         availableCoupons = new ArrayList<>(availableCouponMap.keySet());
@@ -75,12 +76,12 @@ public class DiscountServiceImpl implements IDiscountService {
             CompletableFuture
                     .supplyAsync(
                             () -> calculateSolutionDiscount(availableCouponMap, orderCourses, solution),
-                            discountSolutionExecutor
-                    ).thenAccept(dto -> {
-                // 4.3.提交任务结果
-                list.add(dto);
-                latch.countDown();
-            });
+                            discountSolutionExecutor)
+                    .thenAccept(dto -> {
+                        // 4.3.提交任务结果
+                        list.add(dto);
+                        latch.countDown();
+                    });
         }
         // 4.4.等待运算结束
         try {
@@ -97,12 +98,13 @@ public class DiscountServiceImpl implements IDiscountService {
         // 1.查询用户优惠券
         List<Long> userCouponIds = orderCouponDTO.getUserCouponIds();
         List<Coupon> coupons = userCouponMapper.queryCouponByUserCouponIds(userCouponIds, UserCouponStatus.UNUSED);
-        if (CollUtils.isEmpty(coupons)) {
+        if (CollectionUtils.isEmpty(coupons)) {
             return null;
         }
         // 2.查询优惠券对应课程
-        Map<Coupon, List<OrderCourseDTO>> availableCouponMap = findAvailableCoupon(coupons, orderCouponDTO.getCourseList());
-        if (CollUtils.isEmpty(availableCouponMap)) {
+        Map<Coupon, List<OrderCourseDTO>> availableCouponMap = findAvailableCoupon(coupons,
+                orderCouponDTO.getCourseList());
+        if (MapUtils.isEmpty(availableCouponMap)) {
             return null;
         }
         // 3.查询优惠券规则
@@ -136,8 +138,8 @@ public class DiscountServiceImpl implements IDiscountService {
             lessCouponMap.put(solution.getDiscountAmount(), solution);
         }
         // 3.求交集
-        Collection<CouponDiscountDTO> bestSolutions = CollUtils
-                .intersection(moreDiscountMap.values(), lessCouponMap.values());
+        Collection<CouponDiscountDTO> bestSolutions = CollectionUtils.intersection(moreDiscountMap.values(),
+                lessCouponMap.values());
         // 4.排序，按优惠金额降序
         return bestSolutions.stream()
                 .sorted(Comparator.comparingInt(CouponDiscountDTO::getDiscountAmount).reversed())
@@ -177,7 +179,7 @@ public class DiscountServiceImpl implements IDiscountService {
     }
 
     private void calculateDiscountDetails(Map<Long, Integer> detailMap, List<OrderCourseDTO> courses,
-                                          int totalAmount, int discountAmount) {
+            int totalAmount, int discountAmount) {
         int times = 0;
         int remainDiscount = discountAmount;
         for (OrderCourseDTO course : courses) {
@@ -206,14 +208,15 @@ public class DiscountServiceImpl implements IDiscountService {
             List<OrderCourseDTO> availableCourses = courses;
             if (coupon.getSpecific()) {
                 // 1.1.限定了范围，查询券的可用范围
-                List<CouponScope> scopes = scopeService.lambdaQuery().eq(CouponScope::getCouponId, coupon.getId()).list();
+                List<CouponScope> scopes = scopeService.lambdaQuery().eq(CouponScope::getCouponId, coupon.getId())
+                        .list();
                 // 1.2.获取范围对应的分类id
                 Set<Long> scopeIds = scopes.stream().map(CouponScope::getBizId).collect(Collectors.toSet());
                 // 1.3.筛选课程
                 availableCourses = courses.stream()
                         .filter(c -> scopeIds.contains(c.getCateId())).collect(Collectors.toList());
             }
-            if (CollUtils.isEmpty(availableCourses)) {
+            if (CollectionUtils.isEmpty(availableCourses)) {
                 // 没有任何可用课程，抛弃
                 continue;
             }

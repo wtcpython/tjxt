@@ -1,11 +1,11 @@
 package com.tianji.search.repository.impl;
 
-import com.tianji.search.domain.po.Course;
-import com.tianji.search.repository.CourseRepository;
 import com.tianji.common.exceptions.CommonException;
 import com.tianji.common.utils.JsonUtils;
-import com.tianji.common.utils.StringUtils;
+import com.tianji.search.domain.po.Course;
+import com.tianji.search.repository.CourseRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -33,7 +33,7 @@ import static com.tianji.search.constants.SearchErrorInfo.*;
 @Slf4j
 @Component
 public class CourseRepositoryImpl implements CourseRepository {
-  
+
     private final RestHighLevelClient restHighLevelClient;
 
     public CourseRepositoryImpl(RestHighLevelClient restHighLevelClient) {

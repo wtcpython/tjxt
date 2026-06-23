@@ -8,15 +8,15 @@ import com.alipay.easysdk.payment.common.models.AlipayTradeRefundResponse;
 import com.alipay.easysdk.payment.common.models.TradeFundBill;
 import com.alipay.easysdk.payment.facetoface.models.AlipayTradePrecreateResponse;
 import com.tianji.common.exceptions.CommonException;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.DateUtils;
-import com.tianji.common.utils.StringUtils;
 import com.tianji.pay.sdk.constants.PayConstants;
 import com.tianji.pay.third.CommonPayProperties;
 import com.tianji.pay.third.IPayService;
 import com.tianji.pay.third.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -61,8 +61,6 @@ public class AliPayService implements IPayService {
         return builder.build();
     }
 
-
-
     @Override
     public PayStatusResponse queryPayOrderStatus(String payOrderNo) {
         // 1.发起请求
@@ -80,18 +78,19 @@ public class AliPayService implements IPayService {
         }
         // 2.2.响应结果正常
         String success_time = response.getSendPayDate();
-        LocalDateTime successTime = StringUtils.isBlank(success_time) ?
-                LocalDateTime.now() : DateUtils.parse(success_time, DateUtils.DEFAULT_DATE_TIME_FORMAT);
+        LocalDateTime successTime = StringUtils.isBlank(success_time) ? LocalDateTime.now()
+                : DateUtils.parse(success_time, DateUtils.DEFAULT_DATE_TIME_FORMAT);
         return PayStatusResponse.builder().success(true)
-                        .payStatus(PayStatus.valueOf(response.getTradeStatus()).getValue())
-                        .payOrderNo(response.getOutTradeNo())
-                        .totalAmount(transferStringAmount2Int(response.getTotalAmount()))
-                        .successTime(successTime)
-                        .build();
+                .payStatus(PayStatus.valueOf(response.getTradeStatus()).getValue())
+                .payOrderNo(response.getOutTradeNo())
+                .totalAmount(transferStringAmount2Int(response.getTotalAmount()))
+                .successTime(successTime)
+                .build();
     }
 
     @Override
-    public RefundResponse refundOrder(String payOrderNo, String refundOrderNo, Integer refundAmount, Integer totalAmount) {
+    public RefundResponse refundOrder(String payOrderNo, String refundOrderNo, Integer refundAmount,
+            Integer totalAmount) {
         // 1.发起请求
         AlipayTradeRefundResponse response = null;
         try {
@@ -106,16 +105,17 @@ public class AliPayService implements IPayService {
         // 2.解析响应
         if (!ResponseChecker.success(response)) {
             // 2.1.响应结果异常
-            return RefundResponse.builder().success(false).code(response.getSubCode()).msg(response.getSubMsg()).build();
+            return RefundResponse.builder().success(false).code(response.getSubCode()).msg(response.getSubMsg())
+                    .build();
         }
         // 2.2.响应结果正常，获取响应细节数据
         List<TradeFundBill> refundDetailItemList = response.getRefundDetailItemList();
-        boolean hasDetail = CollUtils.isEmpty(refundDetailItemList);
+        boolean hasDetail = CollectionUtils.isEmpty(refundDetailItemList);
         // 2.3.获取退款成功标示
         boolean success = StringUtils.equals(response.getFundChange(), "Y");
         return RefundResponse.builder()
                 .success(true)
-                .status(success ? RefundStatus.SUCCESS.getValue(): RefundStatus.UN_KNOWN.getValue())
+                .status(success ? RefundStatus.SUCCESS.getValue() : RefundStatus.UN_KNOWN.getValue())
                 .channel(hasDetail ? null : refundDetailItemList.get(0).fundChannel)
                 .amount(hasDetail ? null : transferStringAmount2Int(refundDetailItemList.get(0).getAmount()))
                 .build();
@@ -149,10 +149,10 @@ public class AliPayService implements IPayService {
                 .build();
     }
 
-
     public static int transferStringAmount2Int(String totalAmount) {
         return new BigDecimal(totalAmount).multiply(BigDecimal.valueOf(100)).intValue();
     }
+
     public static String transferAmount2String(Integer amount) {
         BigDecimal b = new BigDecimal(amount);
         BigDecimal result = b.divide(new BigDecimal(100), new MathContext(2, RoundingMode.HALF_UP));

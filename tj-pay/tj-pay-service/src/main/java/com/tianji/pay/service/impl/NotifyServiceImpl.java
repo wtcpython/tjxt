@@ -11,7 +11,7 @@ import com.tianji.common.exceptions.BizIllegalException;
 import com.tianji.common.exceptions.CommonException;
 import com.tianji.common.utils.DateUtils;
 import com.tianji.common.utils.JsonUtils;
-import com.tianji.common.utils.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.tianji.pay.domain.po.PayOrder;
 import com.tianji.pay.domain.po.RefundOrder;
 import com.tianji.pay.sdk.constants.PayConstants;
@@ -75,7 +75,8 @@ public class NotifyServiceImpl implements INotifyService {
 
         // 4.校验通知数据，主要是业务校验、幂等校验
         PayOrder payOrder = checkNotifyData(tradingOrderNo, amount, successTime);
-        if (payOrder == null) return;
+        if (payOrder == null)
+            return;
 
         // 5.通知业务服务
         rabbitMqHelper.send(
@@ -88,7 +89,6 @@ public class NotifyServiceImpl implements INotifyService {
                         .successTime(successTime)
                         .build());
     }
-
 
     @Override
     public void handleWxPayRefundNotify(NotificationRequest request) {
@@ -117,7 +117,8 @@ public class NotifyServiceImpl implements INotifyService {
 
         // 3.幂等性校验
         RefundOrder refundOrder = checkRefundData(refundOrderNo, status, null);
-        if (refundOrder == null) return;
+        if (refundOrder == null)
+            return;
 
         // 4.发送MQ通知业务端
         rabbitMqHelper.send(
@@ -130,8 +131,7 @@ public class NotifyServiceImpl implements INotifyService {
                         .refundChannel(refundOrder.getRefundChannel())
                         .refundOrderNo(refundOrder.getRefundOrderNo())
                         .msg(data.getStr("msg"))
-                        .build()
-        );
+                        .build());
     }
 
     @Override
@@ -152,15 +152,17 @@ public class NotifyServiceImpl implements INotifyService {
         Long tradingOrderNo = StringUtils.isNumeric(out_trade_no) ? Long.valueOf(out_trade_no) : null;
         // 3.2.订单金额，阿里返回的订单金额要乘100
         String total_amount = request.get("total_amount");
-        Integer amount = StringUtils.isNotBlank(total_amount) ? AliPayService.transferStringAmount2Int(total_amount) : null;
+        Integer amount = StringUtils.isNotBlank(total_amount) ? AliPayService.transferStringAmount2Int(total_amount)
+                : null;
         // 3.3.订单支付时间
         String success_time = request.get("notify_time");
-        LocalDateTime successTime = StringUtils.isBlank(success_time) ?
-                LocalDateTime.now() : DateUtils.parse(success_time, DateUtils.DEFAULT_DATE_TIME_FORMAT);
+        LocalDateTime successTime = StringUtils.isBlank(success_time) ? LocalDateTime.now()
+                : DateUtils.parse(success_time, DateUtils.DEFAULT_DATE_TIME_FORMAT);
 
         // 4.校验通知数据，主要是业务校验、幂等校验
         PayOrder payOrder = checkNotifyData(tradingOrderNo, amount, successTime);
-        if (payOrder == null) return;
+        if (payOrder == null)
+            return;
 
         // 5.通知业务服务
         rabbitMqHelper.send(
@@ -171,10 +173,8 @@ public class NotifyServiceImpl implements INotifyService {
                         .payChannel(payOrder.getPayChannelCode())
                         .bizOrderId(payOrder.getBizOrderNo())
                         .successTime(successTime)
-                        .build()
-        );
+                        .build());
     }
-
 
     private RefundOrder checkRefundData(Long refundOrderNo, RefundStatus status, String channel) {
         // 1.查询退款单
@@ -195,7 +195,7 @@ public class NotifyServiceImpl implements INotifyService {
                 .eq(RefundOrder::getId, refundOrder.getId())
                 .eq(RefundOrder::getStatus, refundOrder.getStatus())
                 .update();
-        if(!success){
+        if (!success) {
             return null;
         }
         return refundOrder;
@@ -211,7 +211,6 @@ public class NotifyServiceImpl implements INotifyService {
         return RefundStatus.UN_KNOWN;
     }
 
-
     private void checkAliNotifyRequest(Map<String, String> request) {
         try {
             Boolean isValid = Factory.Payment.Common().verifyNotify(request);
@@ -225,7 +224,6 @@ public class NotifyServiceImpl implements INotifyService {
             throw new CommonException("获取阿里验签工具异常", e);
         }
     }
-
 
     @Nullable
     private Notification checkWxNotifyRequest(NotificationRequest request) {

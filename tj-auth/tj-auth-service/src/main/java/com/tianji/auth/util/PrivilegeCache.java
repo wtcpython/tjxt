@@ -1,11 +1,10 @@
 package com.tianji.auth.util;
 
-import cn.hutool.json.JSONUtil;
 import com.tianji.auth.common.domain.PrivilegeRoleDTO;
 import com.tianji.auth.domain.po.Privilege;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.common.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -33,7 +32,7 @@ public class PrivilegeCache {
         // 1.组装权限对应角色
         Map<String, String> map = new HashMap<>();
         for (PrivilegeRoleDTO prDTO : list) {
-            map.put(prDTO.getId().toString(), JSONUtil.toJsonStr(prDTO));
+            map.put(prDTO.getId().toString(), JsonUtils.toJsonStr(prDTO));
         }
         // 2.写入 redis
         hashOps.putAll(map);
@@ -48,7 +47,7 @@ public class PrivilegeCache {
             privilegeRoleDTO.setAntPath(p.getMethod() + ":" + p.getUri());
             privilegeRoleDTO.setRoles(roleIds);
             privilegeRoleDTO.setInternal(p.getInternal());
-            hashOps.put(p.getId().toString(), JSONUtil.toJsonStr(privilegeRoleDTO));
+            hashOps.put(p.getId().toString(), JsonUtils.toJsonStr(privilegeRoleDTO));
             incrementVersion();
         } catch (Exception e) {
             log.error("缓存权限信息失败。 ->", e);
@@ -66,7 +65,6 @@ public class PrivilegeCache {
         incrementVersion();
     }
 
-
     private void incrementVersion() {
         stringRedisTemplate.opsForValue().increment(AUTH_PRIVILEGE_VERSION_KEY, 1);
     }
@@ -74,7 +72,7 @@ public class PrivilegeCache {
     public void removeCacheByRoleId(Long id) {
         // 查询出所有权限信息
         Map<String, String> cacheMap = hashOps.entries();
-        if(CollUtils.isEmpty(cacheMap)){
+        if (MapUtils.isEmpty(cacheMap)) {
             return;
         }
         // 记录修改的数据
@@ -85,7 +83,7 @@ public class PrivilegeCache {
             PrivilegeRoleDTO prDTO = JsonUtils.toBean(value, PrivilegeRoleDTO.class);
             // 尝试移除角色id
             boolean remove = prDTO.getRoles().remove(id);
-            if(remove){
+            if (remove) {
                 modified.put(en.getKey(), JsonUtils.toJsonStr(prDTO));
             }
         }

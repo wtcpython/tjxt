@@ -8,7 +8,7 @@ import com.tianji.data.model.po.TodayDataInfo;
 import com.tianji.data.model.vo.TodayDataVO;
 import com.tianji.data.service.TodayDataService;
 import com.tianji.data.utils.DataUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +19,10 @@ import org.springframework.stereotype.Service;
  * @Version
  **/
 @Service
+@RequiredArgsConstructor
 public class TodayDataServiceImpl implements TodayDataService {
 
-    @Autowired
-    private StringRedisTemplate redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
     @Override
     public TodayDataVO get() {

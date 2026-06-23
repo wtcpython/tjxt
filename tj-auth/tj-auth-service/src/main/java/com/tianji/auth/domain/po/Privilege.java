@@ -1,7 +1,5 @@
 package com.tianji.auth.domain.po;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.tianji.auth.domain.dto.PrivilegeDTO;
@@ -16,7 +14,6 @@ import java.time.LocalDateTime;
  * <p>
  * 权限表，包括菜单权限和访问路径权限
  * </p>
- *
  * @author 虎哥
  * @since 2022-07-12
  */
@@ -103,7 +100,7 @@ public class Privilege implements Serializable {
         this.internal = dto.getInternal();
     }
 
-    public PrivilegeDTO toDTO(){
+    public PrivilegeDTO toDTO() {
         PrivilegeDTO dto = new PrivilegeDTO();
         dto.setId(id);
         dto.setMenuId(menuId);

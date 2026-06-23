@@ -2,10 +2,10 @@ package com.tianji.learning.mq;
 
 import com.tianji.api.dto.trade.OrderBasicDTO;
 import com.tianji.common.constants.MqConstants;
-import com.tianji.common.utils.CollUtils;
 import com.tianji.learning.service.ILearningLessonService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
@@ -20,14 +20,10 @@ public class LessonChangeListener {
 
     private final ILearningLessonService lessonService;
 
-    @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(value = "learning.lesson.pay.queue", durable = "true"),
-            exchange = @Exchange(name = MqConstants.Exchange.ORDER_EXCHANGE, type = ExchangeTypes.TOPIC),
-            key = MqConstants.Key.ORDER_PAY_KEY
-    ))
-    public void listenLessonPay(OrderBasicDTO order){
+    @RabbitListener(bindings = @QueueBinding(value = @Queue(value = "learning.lesson.pay.queue", durable = "true"), exchange = @Exchange(name = MqConstants.Exchange.ORDER_EXCHANGE, type = ExchangeTypes.TOPIC), key = MqConstants.Key.ORDER_PAY_KEY))
+    public void listenLessonPay(OrderBasicDTO order) {
         // 1.健壮性处理
-        if(order == null || order.getUserId() == null || CollUtils.isEmpty(order.getCourseIds())){
+        if (order == null || order.getUserId() == null || CollectionUtils.isEmpty(order.getCourseIds())) {
             // 数据有误，无需处理
             log.error("接收到MQ消息有误，订单数据为空");
             return;
@@ -37,14 +33,10 @@ public class LessonChangeListener {
         lessonService.addUserLessons(order.getUserId(), order.getCourseIds());
     }
 
-    @RabbitListener(bindings = @QueueBinding(
-            value = @Queue(value = "learning.lesson.refund.queue", durable = "true"),
-            exchange = @Exchange(name = MqConstants.Exchange.ORDER_EXCHANGE, type = ExchangeTypes.TOPIC),
-            key = MqConstants.Key.ORDER_REFUND_KEY
-    ))
-    public void listenLessonRefund(OrderBasicDTO order){
+    @RabbitListener(bindings = @QueueBinding(value = @Queue(value = "learning.lesson.refund.queue", durable = "true"), exchange = @Exchange(name = MqConstants.Exchange.ORDER_EXCHANGE, type = ExchangeTypes.TOPIC), key = MqConstants.Key.ORDER_REFUND_KEY))
+    public void listenLessonRefund(OrderBasicDTO order) {
         // 1.健壮性处理
-        if(order == null || order.getUserId() == null || CollUtils.isEmpty(order.getCourseIds())){
+        if (order == null || order.getUserId() == null || CollectionUtils.isEmpty(order.getCourseIds())) {
             // 数据有误，无需处理
             log.error("接收到MQ消息有误，订单数据为空");
             return;
