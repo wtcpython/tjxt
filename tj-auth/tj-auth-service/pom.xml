@@ -10,11 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>tj-auth-service</artifactId>
-
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>com.tianji</groupId>
@@ -39,8 +34,8 @@
             <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
         </dependency>
         <!--Redis-->
         <dependency>
@@ -72,6 +67,12 @@
             <groupId>com.tianji</groupId>
             <artifactId>tj-auth-resource-sdk</artifactId>
             <version>1.0.0</version>
+        </dependency>
+        <!-- Spring Boot 3.5.x 后 KeyStoreKeyFactory 不再默认提供 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-rsa</artifactId>
+            <version>1.1.5</version>
         </dependency>
     </dependencies>
     <build>

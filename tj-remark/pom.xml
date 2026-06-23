@@ -10,11 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>tj-remark</artifactId>
-
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-    </properties>
     <dependencies>
         <!--auth-sdk-->
         <dependency>
@@ -43,8 +38,8 @@
             <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
         </dependency>
         <!--Redis-->
         <dependency>
